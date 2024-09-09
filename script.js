@@ -221,7 +221,9 @@ document.addEventListener('keyup', (event) => {
     
         const endText = document.createElement('div');
         endText.className = 'end-text';
-        endText.textContent = "PURPLE NEON IN MY BRAIN";
+        const purpleNeonText = `Recent studies in the field of neuropharmacology have identified a novel neurotransmitter dubbed "purple neon" (C22H28N2O3, colloquially known as "mood lightning"). This compound, structurally similar to serotonin but with an unprecedented efficacy, has shown remarkable potential in modulating affective states. Fascinatingly, purple neon exhibits a unique characteristic: it can only manifest when two individuals with complementary neurochemical profiles encounter each other, a phenomenon termed "dyadic resonance." Once activated, the effects are persistent and the neurochemical bond between the two subjects becomes inseparable, leading some researchers to playfully refer to it as "molecular entanglement of the heart." In controlled trials, subjects experiencing purple neon exhibited a 420% increase in reported happiness levels, with side effects limited to an inexplicable affinity for synthwave music and a compulsion to wear reflective sunglasses indoors. The mechanism of action is hypothesized to involve the stimulation of the newly discovered "radical gnarliness" receptors in the prefrontal cortex. While further research is needed, preliminary data suggest that purple neon could revolutionize our understanding of interpersonal biochemistry and mood disorders, potentially rendering traditional antidepressants as obsolete as floppy disks in the age of quantum computing.`;
+
+        endText.textContent = purpleNeonText;
         document.body.appendChild(endText);
     
         setTimeout(() => {
@@ -232,14 +234,14 @@ document.addEventListener('keyup', (event) => {
             endText.style.opacity = '1';
             setTimeout(() => {
                 endText.style.opacity = '0';
-            }, 1000); 
-        }, 4000); 
+            }, 25800); 
+        }, 2000); 
     
         setTimeout(() => {
             document.body.removeChild(endText);
             fadeOut.style.transition = 'none';
             fadeOut.style.opacity = '1';
-        }, 6000);
+        }, 30000);
     }
     
     function resumeAudioContext() {
@@ -288,7 +290,7 @@ document.addEventListener('keyup', (event) => {
                     }, Math.random() * 50 + 50); 
                 }
     
-                if (Math.random() < 0.3) {
+                if (Math.random() < 0.9) {
                     const hue = Math.floor(Math.random() * 360);
                     overlay.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
                     overlay.style.mixBlendMode = 'difference';
@@ -348,28 +350,29 @@ document.addEventListener('keyup', (event) => {
         ];
     
         function flicker() {
-            flickerElement.style.animation = 'brief-flicker 0.1s';
-            
-            // Apply shake effect to elements
             elementsToShake.forEach(el => {
                 el.classList.add('screen-shake');
                 setTimeout(() => el.classList.remove('screen-shake'), 100);
             });
     
-            // Apply color distortion
-            if (Math.random() < 0.9) { 
+            if (Math.random() < 0.8) { 
                 const hue = Math.floor(Math.random() * 360);
                 flickerElement.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
                 flickerElement.style.mixBlendMode = 'difference';
+                flickerElement.style.opacity = '0.5'; 
             } else {
                 flickerElement.style.backgroundColor = 'black';
                 flickerElement.style.mixBlendMode = 'normal';
+                flickerElement.style.opacity = '0.2'; 
             }
     
+            flickerElement.style.display = 'block';
+    
             setTimeout(() => {
-                flickerElement.style.animation = '';
+                flickerElement.style.display = 'none';
                 flickerElement.style.backgroundColor = '';
                 flickerElement.style.mixBlendMode = '';
+                flickerElement.style.opacity = '';
             }, 100);
     
             const nextFlickerTime = 1200 + Math.random() * 500; 

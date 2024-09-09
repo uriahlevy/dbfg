@@ -23,6 +23,7 @@ body {
 
 .key-container {
     padding: 30px;
+    color: #fff;
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 0 30px rgba(212, 142, 255, 0.3);
@@ -59,7 +60,7 @@ body {
 
 .key.pressed {
     background: #D48EFF;
-    color: #1a0033;
+    color: #fff;
     text-shadow: none;
     transform: scale(0.95);
 }
@@ -256,7 +257,7 @@ body::after {
     height: 100%;
     pointer-events: none;
     z-index: 9998;
-    opacity: 0;
+    display: none;
 }
 
 @keyframes brief-flicker {
@@ -290,7 +291,7 @@ body::after {
 
 .end-text {
     font-family: 'Chakra Petch', sans-serif;
-    font-size: 32px;
+    font-size: 13px;
     font-weight: 700;
     color: #f0f;
     text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
