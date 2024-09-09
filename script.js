@@ -5,175 +5,132 @@ document.addEventListener('DOMContentLoaded', () => {
         'A4', 'A4', 'A4', 'G#4', 'E4'
     ];
     let noteIndex = 0;
-    let audioPlayed = false; // Track if audio has been started
     const message = "NOTHINGQUITELIKEYOU";
     const activeNotes = {};
 
-    const reverb = new Tone.Reverb({
-        decay: 1.5,
-        preDelay: 0.005,
-        wet: 0.25
-    }).toDestination();
+    let audioContext;
+    let audioBuffer;
+    let audioSource;
+    let audioPlayed = false;
 
-    const delay = new Tone.FeedbackDelay({
-        delayTime: '8n',
-        feedback: 0.25
-    }).connect(reverb);
+    // Load the audio file
+    fetch('audio.mp3')
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            return audioContext.decodeAudioData(arrayBuffer);
+        })
+        .then(decodedAudio => {
+            audioBuffer = decodedAudio;
+            console.log('Audio loaded and decoded');
+        })
+        .catch(error => console.error('Error loading audio:', error));
 
-    const synth = new Tone.Synth({
-        oscillator: { type: 'sawtooth' },
-        envelope: {
-            attack: 0.01,
-            decay: 0.3,
-            sustain: 0.7,
-            release: 0.5
-        },
-        portamento: 0.05
-    }).connect(delay);
-
-    const additionalSynth = new Tone.Synth({
-        oscillator: { type: 'sawtooth' },
-        envelope: {
-            attack: 0.01,
-            decay: 0.3,
-            sustain: 0.7,
-            release: 0.5
-        },
-        portamento: 0.05
-    }).connect(delay);
-
-    const audio = new Audio('audio.mp3'); // Path to your local audio file
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const track = audioContext.createMediaElementSource(audio);
-    const gainNode = audioContext.createGain();
-    track.connect(gainNode).connect(audioContext.destination);
-
-    async function playEndAudio() {
-        try {
-            await audioContext.resume();
-            audio.addEventListener('loadedmetadata', () => {
-                audio.currentTime = 48; // Ensure the start time is set when metadata is ready
-            });
-            if (!audioPlayed) {
-                audio.play().then(() => {
-                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 1.5); // 1.5 sec fade-in
-                    audioPlayed = true; // Mark audio as played
-                    console.log('Audio is playing from 48 seconds.');
-                }).catch((error) => {
-                    console.error('Failed to play audio:', error);
-                });
-            } else {
-                console.log('Audio has already been played.');
-            }
-        } catch (error) {
-            console.error('Error in playEndAudio:', error);
-        }
-    }
-
-    const analyser = new Tone.Analyser('waveform', 1024);
-    synth.connect(analyser);
-
-    const canvas = document.getElementById('visualizer');
-    const ctx = canvas.getContext('2d');
+        const reverb = new Tone.Reverb({
+            decay: 1.5,
+            preDelay: 0.005,
+            wet: 0.25
+        }).toDestination();
+    
+        const delay = new Tone.FeedbackDelay({
+            delayTime: '8n',
+            feedback: 0.25
+        }).connect(reverb);
+    
+        const synth = new Tone.Synth({
+            oscillator: {
+                type: 'sawtooth'
+            },
+            envelope: {
+                attack: 0.005,
+                decay: 0.1,
+                sustain: 0.3,
+                release: 1
+            },
+            portamento: 0.1 // This enables the glide effect
+        }).connect(delay);
+    
+        const analyser = new Tone.Analyser('waveform', 1024);
+        synth.connect(analyser);
 
     async function startAudio() {
         if (Tone.context.state !== 'running') {
             await Tone.start();
-            console.log('Audio context started');
+            console.log('Tone.js Audio context started');
+        }
+        if (audioContext && audioContext.state !== 'running') {
+            await audioContext.resume();
+            console.log('Audio context resumed');
         }
     }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        const waveform = analyser.getValue();
+    let activeNote = null;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+document.addEventListener('keydown', async (event) => {
+    const key = event.key.toUpperCase();
 
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradient.addColorStop(0, '#7a3fff');
-        gradient.addColorStop(1, '#ff1493');
+    if (noteIndex < melody.length && key === message[noteIndex]) {
+        await startAudio();
 
-        ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = gradient;
-
-        for (let i = 0; i < waveform.length; i++) {
-            const x = (i / waveform.length) * canvas.width;
-            const y = ((waveform[i] + 1) / 2) * canvas.height;
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
+        const note = melody[noteIndex];
+        if (activeNote !== note) {
+            synth.triggerRelease(); // Release the previous note
+            synth.triggerAttack(note);
+            activeNote = note;
         }
-        ctx.stroke();
+        highlightAndGreyOutKey(noteIndex);
+        noteIndex++;
+
+        if (noteIndex >= melody.length) {
+            setTimeout(() => {
+                applyGlitchEffect()
+                resetMelody();
+                setTimeout(() => {
+                    displayAllKeys();
+                    playEndAudio();
+                }, 2000);
+            }, 500);
+        } else {
+            displayNextKey(noteIndex);
+        }
     }
+});
 
-    animate();
-
-    document.addEventListener('keydown', async (event) => {
-        const key = event.key.toUpperCase();
-
-        if (noteIndex < melody.length && key === message[noteIndex]) {
-            await startAudio();
-
-            const note = melody[noteIndex];
-            if (!activeNotes[key]) {
-                synth.triggerAttack(note);
-
-                if (key === 'U' && noteIndex === 8) {
-                    additionalSynth.triggerAttack('E5');
-                }
-
-                activeNotes[key] = true;
-                highlightAndGreyOutKey(noteIndex);
-                noteIndex++;
-
-                if (noteIndex >= melody.length) {
-                    setTimeout(() => {
-                        resetMelody();
-                        setTimeout(() => {
-                            displayAllKeys();
-                            startFlakeAnimation(); // Trigger flake animation
-                            playEndAudio();        // Play audio at the end
-                        }, 1000); // Delay audio start to 1 second
-                    }, 500);
-                } else {
-                    displayNextKey(noteIndex);
-                }
-            }
-        }
-    });
-
-    document.addEventListener('keyup', (event) => {
-        const key = event.key.toUpperCase();
-        if (activeNotes[key]) {
-            synth.triggerRelease();
-            if (key === 'U' && noteIndex > 8) {
-                additionalSynth.triggerRelease();
-            }
-
-            delete activeNotes[key];
-        }
-    });
+document.addEventListener('keyup', (event) => {
+    const key = event.key.toUpperCase();
+    if (key === message[noteIndex - 1]) {
+        synth.triggerRelease();
+        activeNote = null;
+    }
+});
 
     document.getElementById('reset-melody').addEventListener('click', resetMelody);
 
     function resetMelody() {
         synth.triggerRelease();
-        additionalSynth.triggerRelease();
         noteIndex = 0;
         Object.keys(activeNotes).forEach(key => delete activeNotes[key]);
         resetKeys();
     }
-
+    
+    function displayAllKeys() {
+        const allElements = document.querySelectorAll('.key');
+        allElements.forEach(element => {
+            element.classList.remove('active', 'pressed');
+            element.style.opacity = 1;
+        });
+        displayNextKey(0);
+    }
+    
     function displayNextKey(index) {
-        const currentElement = document.querySelector(`.key[data-key="${index}"]`);
-        if (currentElement) {
-            currentElement.classList.add('active');
-            currentElement.style.opacity = 1;
-        }
+        const allElements = document.querySelectorAll('.key');
+        allElements.forEach((element, i) => {
+            if (i === index) {
+                element.classList.add('active');
+            } else {
+                element.classList.remove('active');
+            }
+        });
     }
 
     function highlightAndGreyOutKey(index) {
@@ -188,12 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const allElements = document.querySelectorAll('.key');
         allElements.forEach(element => {
             element.classList.remove('active', 'pressed');
-            element.style.opacity = 0; // Hide all keys initially
+            element.style.opacity = 0;
         });
-        displayNextKey(noteIndex); // Only display the first key
+        displayNextKey(noteIndex);
     }
 
-    // Show all keys at full opacity
     function displayAllKeys() {
         const allElements = document.querySelectorAll('.key');
         allElements.forEach(element => {
@@ -204,47 +160,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     displayNextKey(noteIndex);
 
-    function createFlakes() {
-        const numberOfFlakes = 100;
-        const flakes = [];
-
-        for (let i = 0; i < numberOfFlakes; i++) {
-            flakes.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                speed: Math.random() * 3 + 1
-            });
-        }
-
-        return flakes;
+    function startThumping() {
+        const keys = document.querySelectorAll('.key');
+        keys.forEach(key => key.classList.add('thumping'));
     }
-
-    function drawFlakes(ctx, flakes) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.beginPath();
-        flakes.forEach(flake => {
-            ctx.moveTo(flake.x, flake.y);
-            ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-        });
-        ctx.fill();
+    
+    function stopThumping() {
+        const keys = document.querySelectorAll('.key');
+        keys.forEach(key => key.classList.remove('thumping'));
     }
-
-    function animateFlakes(ctx, flakes) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawFlakes(ctx, flakes);
-        flakes.forEach(flake => {
-            flake.y += flake.speed;
-            if (flake.y > canvas.height) {
-                flake.y = 0;
-                flake.x = Math.random() * canvas.width;
+    
+    function playEndAudio() {
+        console.log('playEndAudio called');
+        if (!audioPlayed && audioBuffer) {
+            if (audioSource) {
+                audioSource.stop();
             }
-        });
-        requestAnimationFrame(() => animateFlakes(ctx, flakes));
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+    
+            // Create a gain node for the fade-in effect
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 1.5);
+    
+            audioSource.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            const startTime = 48; // Start from 48 seconds
+            const duration = audioBuffer.duration - startTime;
+            
+            audioSource.start(0, startTime, duration);
+            document.querySelector('.volume-label').classList.add('active');
+            audioPlayed = true;
+            console.log(`Audio playing from ${startTime} seconds with fade-in`);
+            
+            startThumping(); // Start the thumping animation
+            
+            // Stop thumping when audio ends
+            setTimeout(() => {
+                stopThumping();
+            }, duration * 1000);
+        } else if (!audioBuffer) {
+            console.log('Audio not yet loaded');
+        } else {
+            console.log('Audio already played');
+        }
     }
 
-    function startFlakeAnimation() {
-        const flakes = createFlakes();
-        animateFlakes(ctx, flakes);
+    // Make sure to call this function when user interaction occurs
+    function resumeAudioContext() {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
     }
+
+    function applyGlitchEffect() {
+        // Create and add the overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'glitch-overlay';
+        document.body.appendChild(overlay);
+      
+        // Trigger the initial glitch effect
+        setTimeout(() => {
+          overlay.style.opacity = '1';
+          overlay.style.animation = 'glitch-flicker 0.1s steps(1, end) 3';
+        }, 50);
+      
+        // Start the gradual resume effect
+        setTimeout(() => {
+          overlay.style.animation = 'glitch-resume 1.5s ease-out forwards';
+        }, 1000);
+      
+        // Remove the overlay after the effect
+        setTimeout(() => {
+          document.body.removeChild(overlay);
+        }, 2500);
+      }
+    // Add this to your existing event listeners or user interaction handlers
+    document.addEventListener('click', resumeAudioContext);
 });

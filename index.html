@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio-Visual Experience</title>
+    <title>D B F G</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <canvas id="visualizer"></canvas>
-        
+        <div class="volume-label">Volume Up</div>
         <div class="key-container">
-            <!-- Assign unique data-key attributes -->
             <div class="word">
-                <span class="key active" data-key="0">N</span>
+                <span class="key" data-key="0">N</span>
                 <span class="key" data-key="1">O</span>
                 <span class="key" data-key="2">T</span>
                 <span class="key" data-key="3">H</span>
@@ -39,10 +38,11 @@
                 <span class="key" data-key="17">O</span>
                 <span class="key" data-key="18">U</span>
             </div>
+            <div class="button-container">
+                <button id="reset-melody">Reset Melody</button>
+                <button id="start-audio">Start Audio</button>
+            </div>
         </div>
-        
-        <button id="start-audio">Start Audio</button>
-        <button id="reset-melody">Reset Melody</button>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.34/Tone.min.js"></script>
     <script src="script.js"></script>
