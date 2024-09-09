@@ -1,0 +1,93 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(to bottom, #D48EFF, #FF69B4); /* Purple to pink gradient */
+    font-family: Arial, sans-serif;
+    position: relative;
+}
+
+.container {
+    text-align: center;
+}
+
+#visualizer {
+    width: 600px;
+    height: 200px;
+    background: linear-gradient(to bottom, #D48EFF, #FF69B4); /* Match bg color for coherence */
+    margin-bottom: 20px;
+}
+
+.key-container {
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.key {
+    display: inline-block;
+    background: linear-gradient(to bottom, #e091ff, #ff69b4); /* Vibrant purple-pink gradient */
+    border: 2px solid #a754d4;
+    border-radius: 5px;
+    padding: 15px 20px;
+    margin: 5px;
+    font-size: 20px;
+    text-align: center;
+    box-shadow: 0 3px 0 #a754d4, 0 4px 6px rgba(0, 0, 0, 0.2);
+    cursor: default;
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.3s, background-color 0.3s;
+    color: #fff; 
+    opacity: 0; 
+}
+
+.active {
+    opacity: 1; 
+}
+
+.pressed {
+    background: linear-gradient(to bottom, #c287ff, #ff85ab); /* Darker on press */
+    box-shadow: 0 2px 0 #9248aa, 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px);
+    opacity: 0.5; 
+}
+
+#start-audio {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: linear-gradient(to right, #e091ff, #ff69b4);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+#start-audio:hover {
+    transform: translateY(-2px);
+}
+
+#reset-melody {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #a754d4;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+#reset-melody:hover {
+    background-color: #8f47c0;
+    transform: translateY(-2px);
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio-Visual Experience</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <canvas id="visualizer"></canvas>
+        
+        <div class="key-container">
+            <!-- Assign unique data-key attributes -->
+            <div class="word">
+                <span class="key active" data-key="0">N</span>
+                <span class="key" data-key="1">O</span>
+                <span class="key" data-key="2">T</span>
+                <span class="key" data-key="3">H</span>
+                <span class="key" data-key="4">I</span>
+                <span class="key" data-key="5">N</span>
+                <span class="key" data-key="6">G</span>
+            </div>
+            <div class="word">
+                <span class="key" data-key="7">Q</span>
+                <span class="key" data-key="8">U</span>
+                <span class="key" data-key="9">I</span>
+                <span class="key" data-key="10">T</span>
+                <span class="key" data-key="11">E</span>
+            </div>
+            <div class="word">
+                <span class="key" data-key="12">L</span>
+                <span class="key" data-key="13">I</span>
+                <span class="key" data-key="14">K</span>
+                <span class="key" data-key="15">E</span>
+            </div>
+            <div class="word">
+                <span class="key" data-key="16">Y</span>
+                <span class="key" data-key="17">O</span>
+                <span class="key" data-key="18">U</span>
+            </div>
+        </div>
+        
+        <button id="start-audio">Start Audio</button>
+        <button id="reset-melody">Reset Melody</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.34/Tone.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
