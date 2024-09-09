@@ -186,8 +186,8 @@ document.addEventListener('keyup', (event) => {
             gainNode.connect(audioContext.destination);
             
             const startTime = 50;
-            const duration = 5;
-            // const duration = audioBuffer.duration - startTime;
+            // const duration = 5;
+            const duration = audioBuffer.duration - startTime;
             
             audioSource.start(0, startTime, duration);
             document.querySelector('.volume-label').classList.add('active');
