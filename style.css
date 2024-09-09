@@ -128,7 +128,6 @@ body {
 }
 
 .volume-label::before {
-    content: '🔊';
     margin-right: 5px;
 }
 
@@ -204,18 +203,30 @@ body::after {
     animation: quick-glitch 0.2s ease-in-out 3;
   }
 
-  .glitch-overlay {
+  @keyframes horizontal-shift {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes vertical-shift {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-2px); }
+    75% { transform: translateY(2px); }
+}
+
+.glitch-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: black;
-    z-index: 9999;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.1s;
-  }
+    z-index: 9999;
+    animation: horizontal-shift 0.2s infinite, vertical-shift 0.3s infinite;
+}
   
   @keyframes glitch-flicker {
     0% { opacity: 1; }
@@ -232,15 +243,65 @@ body::after {
   }
   
   @keyframes glitch-resume {
-    0% { opacity: 1; }
-    10% { opacity: 0; }
-    20% { opacity: 1; }
-    30% { opacity: 0; }
-    40% { opacity: 0.8; }
+    0%, 100% { opacity: 1; }
+    5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85%, 95% { opacity: 0; }
+    10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90% { opacity: 1; }
+}
+
+.screen-flicker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+}
+
+@keyframes brief-flicker {
+    0%, 100% { opacity: 0; }
     50% { opacity: 0.2; }
-    60% { opacity: 0.7; }
-    70% { opacity: 0.3; }
-    80% { opacity: 0.5; }
-    90% { opacity: 0.2; }
-    100% { opacity: 0; }
-  }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(4px, 4px) rotate(1deg); }
+    40% { transform: translate(-4px, -4px) rotate(-1deg); }
+    60% { transform: translate(4px, -4px) rotate(1deg); }
+    80% { transform: translate(-4px, 4px) rotate(-1deg); }
+}
+
+.screen-shake {
+    animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.fade-out {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0;
+    transition: opacity 5s;
+    z-index: 10000;
+}
+
+.end-text {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #f0f;
+    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 10001;
+}
