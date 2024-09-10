@@ -1,4 +1,19 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+    function addScrewsToContainer() {
+        const wrapper = document.querySelector('.key-container-wrapper');
+        const screwPositions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+
+        screwPositions.forEach(position => {
+            const screw = document.createElement('div');
+            screw.className = `screw screw-${position}`;
+            wrapper.appendChild(screw);
+        });
+    }
+
+
+    // Call this function after your container is created or when the DOM is loaded
+    addScrewsToContainer();
     const melody = [
         'A4', 'B4', 'G#4', 'A4', 'G#4', 'E4', 'F#4',
         'C#4', 'E4', 'B4', 'G#4', 'A4', 'G#4', 'E4',
@@ -365,9 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, Math.random() * 50 + 20);
                 }
 
-                if (Math.random() < 0.9) {
+                if (Math.random() < 0.7) {
                     const hue = Math.floor(Math.random() * 360);
-                    overlay.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+                    overlay.style.backgroundColor = `hsl(${hue}, 150%, 80%)`;
                     overlay.style.mixBlendMode = 'difference';
                 } else {
                     overlay.style.backgroundColor = 'black';

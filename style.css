@@ -5,11 +5,13 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background: #120024;
+    background: #150021;
     font-family: 'Montserrat', sans-serif;
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    background: linear-gradient(160deg, #1a0227 0%, #2f034b 30%, #4b067a 70%, #6b08aa 100%);
+
 }
 
 .container {
@@ -23,11 +25,11 @@ body {
 }
 
 @keyframes jitter {
-    0% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.1); }
-    25% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), 2px 2px 0 2px rgba(255, 255, 255, 0.1); }
-    50% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px 2px 0 2px rgba(255, 255, 255, 0.1); }
-    75% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px -2px 0 2px rgba(255, 255, 255, 0.1); }
-    100% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), 2px -2px 0 2px rgba(255, 255, 255, 0.1); }
+    0% { box-shadow: 0 0 5px rgba(212, 142, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.1); }
+    25% { box-shadow: 0 0 15px rgba(212, 142, 255, 0.3), 2px 2px 0 1px rgba(255, 255, 255, 0.1); }
+    50% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px 2px 0 1px rgba(255, 255, 255, 0.1); }
+    75% { box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), -2px -2px 0 1px rgba(255, 255, 255, 0.1); }
+    100% { box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), 2px -2px 0 1px rgba(255, 255, 255, 0.1); }
 }
 
 .key-container {
@@ -43,10 +45,68 @@ body {
     align-items: center;
 }
 
+.key-container-wrapper {
+    position: relative;
+    transform: rotate(3deg);
+    transform-origin: top right;
+    transition: transform 0.3s ease;
+}
+
+.key-container-wrapper:hover {
+    transform: rotate(0deg);
+}
+
+.screw {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #808080;
+    border-radius: 50%;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+}
+
+.screw::before,
+.screw::after {
+    content: '';
+    position: absolute;
+    background-color: #606060;
+}
+
+.screw::before {
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 2px;
+    transform: translate(-50%, -50%);
+}
+
+.screw::after {
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 8px;
+    transform: translate(-50%, -50%);
+}
+
+.screw-top-left { top: 5px; left: 5px; }
+.screw-top-right { top: 5px; right: 5px; }
+.screw-bottom-left { bottom: 5px; left: 5px; }
+.screw-bottom-right { bottom: 5px; right: 5px; }
+
+.screw-top-right {
+    background-color: #333;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+}
+
+.screw-top-right::before,
+.screw-top-right::after {
+    display: none;
+}
 .key {
     display: inline-block;
     background: none;
     border: 2px solid #D48EFF;
+    filter: url('#turbulence');
     border-radius: 10px;
     padding: 15px 20px;
     margin: 8px;
@@ -282,7 +342,7 @@ body::after,
     bottom: 0;
     background:
         radial-gradient(circle, rgba(255, 0, 255, 0.5), transparent 60%),
-        radial-gradient(circle, rgba(0, 255, 255, 0.5), transparent 20%),
+        radial-gradient(circle, rgba(1, 162, 162, 0.5), transparent 20%),
         /* radial-gradient(circle, rgba(255, 255, 0, 0.5), transparent 30%), */
         /* linear-gradient(145deg, rgba(255, 0, 255, 0.4), rgba(0, 255, 0, 0.4)), */
         /* linear-gradient(235deg, rgba(0, 0, 255, 0.4), rgba(255, 165, 0, 0.4)), */
@@ -290,45 +350,20 @@ body::after,
         background-size: 150% 150%;
     opacity: var(--iridescent-opacity);
     mix-blend-mode: overlay;
+    background: linear-gradient(
+        45deg, 
+        rgba(255, 0, 255, 0.3), 
+        rgba(0, 255, 255, 0.3), 
+        rgba(255, 255, 0, 0.3), 
+        rgba(255, 20, 147, 0.3)
+    );
+    background-size: 400% 400%;
 }
 
-body::before {
-    animation: wave-twist 15s infinite linear alternate-reverse;
-    z-index: -3;
-}
-
-body::after {
-    animation: wave-twist 30s infinite linear alternate;
-    z-index: -2;
-    opacity: 0.5;
-}
-
-.iridescent-layer {
-    animation: wave-twist 30s infinite linear alternate-reverse;
-    z-index: -1;
-    opacity: 0.5;
-}
-
-@keyframes wave-twist {
-    0% {
-        background-position: 0% 0%;
-    }
-
-    25% {
-        background-position: 100% 50%;
-    }
-
-    50% {
-        background-position: 50% 100%;
-    }
-
-    75% {
-        background-position: 0% 50%;
-    }
-
-    100% {
-        background-position: 50% 0%;
-    }
+@keyframes moveBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* Glitch effect styles */
