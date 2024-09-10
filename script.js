@@ -13,6 +13,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioSource;
     let audioPlayed = false;
     setupScreenFlicker()
+
+    const kickAudio = document.querySelector('audio[data-key="kick"]');
+    const snareAudio = document.querySelector('audio[data-key="snare"]');
+    const glitchAudio = new Audio('glitch_short.wav');
+    const crackleAudio = new Audio('crackles.wav')
+
+
+    function playAudioSample(audio) {
+        if (audio.paused) {
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            audio.currentTime = 0;
+        }
+    }
+
     fetch('audio.mp3')
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => {
@@ -25,32 +41,32 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error loading audio:', error));
 
-        const reverb = new Tone.Reverb({
-            decay: 1.5,
-            preDelay: 0.005,
-            wet: 0.25
-        }).toDestination();
-    
-        const delay = new Tone.FeedbackDelay({
-            delayTime: '8n',
-            feedback: 0.25
-        }).connect(reverb);
-    
-        const synth = new Tone.Synth({
-            oscillator: {
-                type: 'sawtooth'
-            },
-            envelope: {
-                attack: 0.005,
-                decay: 0.1,
-                sustain: 0.3,
-                release: 1
-            },
-            portamento: 0.1 
-        }).connect(delay);
-    
-        const analyser = new Tone.Analyser('waveform', 1024);
-        synth.connect(analyser);
+    const reverb = new Tone.Reverb({
+        decay: 1.5,
+        preDelay: 0.005,
+        wet: 0.35
+    }).toDestination();
+
+    const delay = new Tone.FeedbackDelay({
+        delayTime: '4n',
+        feedback: 0.25
+    }).connect(reverb);
+
+    const synth = new Tone.Synth({
+        oscillator: {
+            type: 'sawtooth'
+        },
+        envelope: {
+            attack: 0.000,
+            decay: 0.8,
+            sustain: 0.8,
+            release: 0
+        },
+        portamento: 0.07
+    }).connect(delay);
+
+    const analyser = new Tone.Analyser('waveform', 1024);
+    synth.connect(analyser);
 
     async function startAudio() {
         if (Tone.context.state !== 'running') {
@@ -64,68 +80,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let activeNote = null;
+    let isMelodyCompleted = false;
+    applyBadBulbEffect();
 
-document.addEventListener('keydown', async (event) => {
-    const key = event.key.toUpperCase();
+    document.addEventListener('keydown', async (event) => {
+        const key = event.key.toUpperCase();
 
-    if (noteIndex < melody.length && key === message[noteIndex]) {
         await startAudio();
 
-        const note = melody[noteIndex];
-        if (activeNote !== note) {
-            synth.triggerRelease(); 
+        if (noteIndex < melody.length && key === message[noteIndex]) {
+            const note = melody[noteIndex];
+            synth.triggerRelease();
             synth.triggerAttack(note);
             activeNote = note;
-        }
-        highlightAndGreyOutKey(noteIndex);
-        noteIndex++;
 
-        if (noteIndex >= melody.length) {
-            setTimeout(() => {
-                applyGlitchEffect();
+            highlightAndGreyOutKey(noteIndex);
+            noteIndex++;
+
+            if (noteIndex >= melody.length) {
                 setTimeout(() => {
-                    resetMelody();
-                    displayAllKeys();
-                    playEndAudio();
-                }, 500);
-            }, 500);
-        } else {
-            displayNextKey(noteIndex);
+                    applyGlitchEffect();
+                    setTimeout(() => {
+                        resetMelody();
+                        displayAllKeys();
+                        playEndAudio();
+                    }, 200);
+                }, 200);
+            } else {
+                displayNextKey(noteIndex);
+            }
         }
-    }
-});
 
-document.addEventListener('keyup', (event) => {
-    const key = event.key.toUpperCase();
-    if (key === message[noteIndex - 1]) {
-        synth.triggerRelease();
-        activeNote = null;
-    }
-});
+        if (event.key.toLowerCase() === 'b') {
+            playAudioSample(kickAudio);
+            highlightAndGreyOutKeyById('kick');
+        } else if (event.key.toLowerCase() === 'p') {
+            playAudioSample(snareAudio);
+            highlightAndGreyOutKeyById('snare');
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        const key = event.key.toUpperCase();
+        if (key === message[noteIndex - 1]) {
+            synth.triggerRelease();
+            activeNote = null;
+        }
+    });
 
     document.getElementById('reset-melody').addEventListener('click', resetMelody);
 
     function resetMelody() {
+        isMelodyCompleted = false;
         synth.triggerRelease();
         noteIndex = 0;
         Object.keys(activeNotes).forEach(key => delete activeNotes[key]);
         resetKeys();
     }
-    
+
     function displayAllKeys() {
         const allElements = document.querySelectorAll('.key');
         allElements.forEach(element => {
             element.classList.remove('active', 'pressed');
+            element.classList.remove('invisible');
             element.style.opacity = 1;
         });
         displayNextKey(0);
     }
-    
+
     function displayNextKey(index) {
         const allElements = document.querySelectorAll('.key');
         allElements.forEach((element, i) => {
             if (i === index) {
                 element.classList.add('active');
+                element.style.opacity = 1
             } else {
                 element.classList.remove('active');
             }
@@ -136,14 +164,30 @@ document.addEventListener('keyup', (event) => {
         const element = document.querySelector(`.key[data-key="${index}"]`);
         if (element) {
             element.classList.add('pressed');
-            element.style.opacity = 0.5;
+            setTimeout(() => {
+                if (!audioPlayed) {
+                    element.classList.remove('pressed');
+                    element.classList.remove('active');
+                    element.classList.add('invisible');
+                }
+            }, 500);
+        }
+    }
+
+    function highlightAndGreyOutKeyById(id) {
+        const element = document.querySelector(`.key[data-key="${id}"]`);
+        if (element) {
+            element.classList.add('pressed');
+            setTimeout(() => {
+                element.classList.remove('pressed');
+            }, 500);
         }
     }
 
     function resetKeys() {
         const allElements = document.querySelectorAll('.key');
         allElements.forEach(element => {
-            element.classList.remove('active', 'pressed');
+            element.classList.remove('active', 'pressed', 'invisible');
             element.style.opacity = 0;
         });
         displayNextKey(noteIndex);
@@ -163,47 +207,62 @@ document.addEventListener('keyup', (event) => {
         const keys = document.querySelectorAll('.key');
         keys.forEach(key => key.classList.add('thumping'));
     }
-    
+
     function stopThumping() {
         const keys = document.querySelectorAll('.key');
         keys.forEach(key => key.classList.remove('thumping'));
     }
-    
+
     function playEndAudio() {
         console.log('playEndAudio called');
         if (!audioPlayed && audioBuffer) {
             if (audioSource) {
                 audioSource.stop();
             }
+            playAudioSample(glitchAudio);
             audioSource = audioContext.createBufferSource();
             audioSource.buffer = audioBuffer;
-    
+
             const gainNode = audioContext.createGain();
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 1.5);
-    
-            audioSource.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
+            // const duration = 2
             const startTime = 50;
-            // const duration = 5;
             const duration = audioBuffer.duration - startTime;
-            
-            audioSource.start(0, startTime, duration);
+
+            setTimeout(() => {
+                const now = audioContext.currentTime;
+                const fadeInDuration = 1.5;
+
+                gainNode.gain.setValueAtTime(0.1, now);
+
+                gainNode.gain.exponentialRampToValueAtTime(1, now + fadeInDuration);
+
+                audioSource.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                switchToLightMode();
+
+                audioSource.start(now, startTime, duration);
+
+                let elapsed = 0;
+                const interval = setInterval(() => {
+                    console.log(`Gain at ${elapsed / 10}s:`, gainNode.gain.value);
+                    elapsed += 1;
+                    if (elapsed > fadeInDuration * 10) clearInterval(interval);
+                }, 100);
+            }, 2300);
+
+
             document.querySelector('.volume-label').classList.add('active');
             audioPlayed = true;
-            console.log(`Audio playing from ${startTime} seconds with fade-in`);
-            
+
             startThumping();
-            
-            // Apply glitch effect after a short delay
-            setTimeout(applyGlitchEffect, 500);
-            
+
+            setTimeout(applyGlitchEffect, 200);
+
             setTimeout(() => {
                 stopThumping();
             }, duration * 1000);
-    
-            // Call endSequence when audio ends
+
             setTimeout(() => {
                 endSequence();
             }, duration * 1000);
@@ -213,37 +272,70 @@ document.addEventListener('keyup', (event) => {
             console.log('Audio already played');
         }
     }
-    
+
+    function playRandomGlitches(duration = 30000) {
+        const startTime = Date.now();
+
+        function playRandomGlitch() {
+            playAudioSample(crackleAudio);
+
+            const now = Date.now();
+            if (now - startTime < duration) {
+                const randomDelay = Math.random() * 4000 + 1800;
+                setTimeout(playRandomGlitch, randomDelay);
+            }
+        }
+        playRandomGlitch()
+    }
+
     function endSequence() {
         const fadeOut = document.createElement('div');
         fadeOut.className = 'fade-out';
         document.body.appendChild(fadeOut);
-    
+
         const endText = document.createElement('div');
         endText.className = 'end-text';
+        const textContent = document.createElement('div');
+        textContent.className = 'text-content';
         const purpleNeonText = `Recent studies in the field of neuropharmacology have identified a novel neurotransmitter dubbed "purple neon" (C22H28N2O3, colloquially known as "mood lightning"). This compound, structurally similar to serotonin but with an unprecedented efficacy, has shown remarkable potential in modulating affective states. Fascinatingly, purple neon exhibits a unique characteristic: it can only manifest when two individuals with complementary neurochemical profiles encounter each other, a phenomenon termed "dyadic resonance." Once activated, the effects are persistent and the neurochemical bond between the two subjects becomes inseparable, leading some researchers to playfully refer to it as "molecular entanglement of the heart." In controlled trials, subjects experiencing purple neon exhibited a 420% increase in reported happiness levels, with side effects limited to an inexplicable affinity for synthwave music and a compulsion to wear reflective sunglasses indoors. The mechanism of action is hypothesized to involve the stimulation of the newly discovered "radical gnarliness" receptors in the prefrontal cortex. While further research is needed, preliminary data suggest that purple neon could revolutionize our understanding of interpersonal biochemistry and mood disorders, potentially rendering traditional antidepressants as obsolete as floppy disks in the age of quantum computing.`;
+        textContent.textContent = purpleNeonText;
 
-        endText.textContent = purpleNeonText;
+        endText.appendChild(textContent);
         document.body.appendChild(endText);
-    
+
+        function shakeElement(element) {
+            element.classList.add('screen-shake');
+            setTimeout(() => element.classList.remove('screen-shake'), 500);
+        }
+
+        function endShake() {
+            shakeElement(textContent);
+            setTimeout(endShake, 3900 + Math.random() * 500);
+        }
+
+        // Start the shaking
+        endShake();
+
         setTimeout(() => {
             fadeOut.style.opacity = '1';
+            playRandomGlitches();
         }, 100);
-    
+
         setTimeout(() => {
             endText.style.opacity = '1';
             setTimeout(() => {
+                endText.style.transition = 'opacity 2s';
                 endText.style.opacity = '0';
-            }, 25800); 
-        }, 2000); 
-    
+            }, 25800);
+        }, 2000);
+
         setTimeout(() => {
             document.body.removeChild(endText);
             fadeOut.style.transition = 'none';
             fadeOut.style.opacity = '1';
         }, 30000);
     }
-    
+
     function resumeAudioContext() {
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
@@ -254,42 +346,25 @@ document.addEventListener('keyup', (event) => {
         const overlay = document.createElement('div');
         overlay.className = 'glitch-overlay';
         document.body.appendChild(overlay);
-    
+
         overlay.style.opacity = '1';
-    
+
         let startTime = performance.now();
         const duration = 1800;
         let isEffectActive = true;
-        
-        let gainNode, pannerNode;
-        if (audioContext && audioSource) {
-            try {
-                gainNode = audioContext.createGain();
-                gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-    
-                pannerNode = audioContext.createStereoPanner();
-    
-                audioSource.disconnect();
-                audioSource.connect(gainNode);
-                gainNode.connect(pannerNode);
-                pannerNode.connect(audioContext.destination);
-            } catch (e) {
-                console.error('Failed to set up audio glitch effect:', e);
-            }
-        }
-    
+
         function glitchFrame(currentTime) {
             if (!isEffectActive) return;
-    
+
             const elapsed = currentTime - startTime;
             if (elapsed < duration) {
                 if (Math.random() < 0.7) {
                     overlay.style.opacity = '1';
                     setTimeout(() => {
                         if (isEffectActive) overlay.style.opacity = '0';
-                    }, Math.random() * 50 + 50); 
+                    }, Math.random() * 50 + 20);
                 }
-    
+
                 if (Math.random() < 0.9) {
                     const hue = Math.floor(Math.random() * 360);
                     overlay.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
@@ -298,23 +373,13 @@ document.addEventListener('keyup', (event) => {
                     overlay.style.backgroundColor = 'black';
                     overlay.style.mixBlendMode = 'normal';
                 }
-    
-                if (gainNode && pannerNode) {
-                    const now = audioContext.currentTime;
-                    if (Math.random() < 0.2) {
-                        gainNode.gain.setValueAtTime(Math.random() < 0.5 ? 0 : 2, now);
-                        gainNode.gain.setValueAtTime(1, now + 0.05);
-                        
-                        pannerNode.pan.setValueAtTime(Math.random() * 2 - 1, now);
-                    }
-                }
-    
+
                 requestAnimationFrame(glitchFrame);
             } else {
                 endGlitchEffect();
             }
         }
-    
+
         function endGlitchEffect() {
             if (!isEffectActive) return;
             isEffectActive = false;
@@ -325,63 +390,90 @@ document.addEventListener('keyup', (event) => {
                     document.body.removeChild(overlay);
                 }
             }, 100);
-    
-            if (gainNode && pannerNode && audioSource) {
-                audioSource.disconnect(gainNode);
-                gainNode.disconnect(pannerNode);
-                pannerNode.disconnect();
-                audioSource.connect(audioContext.destination);
-            }
         }
-    
+
         requestAnimationFrame(glitchFrame);
-    
-        setTimeout(endGlitchEffect, duration + 100);
+
+        setTimeout(endGlitchEffect, duration + 200);
     }
+
+    function switchToLightMode() {
+        console.log("turn on the lights")
+        setIridescentOpacity(0.8)
+    }
+
+    function applyBadBulbEffect() {
+        const keys = document.querySelectorAll('.key');
+        const numKeys = keys.length;
+
+        const numAffectedKeys = Math.floor(Math.random() * 4) + 2;
+
+        for (let i = 0; i < numAffectedKeys; i++) {
+            const randomIndex = Math.floor(Math.random() * numKeys);
+            const key = keys[randomIndex];
+
+            key.classList.add('bad-bulb');
+
+            setTimeout(() => {
+                key.classList.remove('bad-bulb');
+            }, 700);
+        }
+        const nextEffectDelay = Math.random() * 1000 + 500;
+        setTimeout(applyBadBulbEffect, nextEffectDelay);
+    }
+
 
     function setupScreenFlicker() {
         const flickerElement = document.createElement('div');
         flickerElement.className = 'screen-flicker';
         document.body.appendChild(flickerElement);
-    
+
         const elementsToShake = [
             document.querySelector('.container'),
             ...document.querySelectorAll('.key')
         ];
-    
+
         function flicker() {
             elementsToShake.forEach(el => {
                 el.classList.add('screen-shake');
-                setTimeout(() => el.classList.remove('screen-shake'), 100);
+                setTimeout(() => el.classList.remove('screen-shake'), 200);
             });
-    
-            if (Math.random() < 0.8) { 
+
+            if (Math.random() < 0.8) {
                 const hue = Math.floor(Math.random() * 360);
                 flickerElement.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
                 flickerElement.style.mixBlendMode = 'difference';
-                flickerElement.style.opacity = '0.5'; 
+                flickerElement.style.opacity = '0.5';
             } else {
                 flickerElement.style.backgroundColor = 'black';
                 flickerElement.style.mixBlendMode = 'normal';
-                flickerElement.style.opacity = '0.2'; 
+                flickerElement.style.opacity = '0.2';
             }
-    
+
             flickerElement.style.display = 'block';
-    
+
             setTimeout(() => {
                 flickerElement.style.display = 'none';
                 flickerElement.style.backgroundColor = '';
                 flickerElement.style.mixBlendMode = '';
                 flickerElement.style.opacity = '';
             }, 100);
-    
-            const nextFlickerTime = 1200 + Math.random() * 500; 
+
+            const nextFlickerTime = 2000 + Math.random() * 500;
             setTimeout(flicker, nextFlickerTime);
         }
-    
-        flicker(); 
+
+        flicker();
     }
-      
-    
+
+    function setIridescentOpacity(opacity) {
+        document.body.style.setProperty('--iridescent-opacity', opacity);
+
+        const iridescentLayer = document.querySelector('.iridescent-layer');
+        if (iridescentLayer) {
+            iridescentLayer.style.opacity = opacity;
+        }
+    }
+
     document.addEventListener('click', resumeAudioContext);
 });
