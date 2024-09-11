@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let renderer, scene, camera, waveObject;
-    const waveSpeed = 0.0003; // Slightly slower for smoother animation
-    const waveHeight = 0.65; // Increased for more dramatic movement
+    const waveSpeed = 0.0001;
+    const waveHeight = 0.45;
 
     function isWebGLAvailable() {
         try {
@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showWebGLInstructions() {
+        const divToHide = document.querySelector('.key-container-wrapper');
+        if (divToHide) {
+            divToHide.style.display = 'none';
+        }
         const instructionsElement = document.getElementById('webgl-instructions');
         if (instructionsElement) {
             instructionsElement.style.display = 'block';
@@ -28,14 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     alpha: true,
                     antialias: true // Added for smoother lines
                 });
+                updateVersionLabel(true);
             } catch (e) {
                 console.warn("WebGL initialization failed, falling back to CSS3DRenderer");
                 showWebGLInstructions();
+                updateVersionLabel(false);
                 return tryCSS3DRenderer();
             }
         } else {
             console.warn("WebGL not supported, falling back to CSS3DRenderer");
             showWebGLInstructions();
+            updateVersionLabel(false);
             return tryCSS3DRenderer();
         }
 
@@ -58,24 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-// The rest of your code (initScene, animate, etc.) remains the same
     function initScene() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 0.5;
 
         const geometry = new THREE.PlaneGeometry(3, 3, 400, 400); // Increased to 800x800 for an even finer mesh
-        // Increased to 500x500 for much finer mesh
         const material = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             transparent: true,
-            opacity: 0.04, // Reduced opacity for subtler effect
+            opacity: 0.04,
             wireframe: true
         });
 
         waveObject = new THREE.Mesh(geometry, material);
         scene.add(waveObject);
-
 
         animate();
     }
@@ -86,8 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
             initScene();
         }
     }
-
-// Call this function when your page loads
 
     init();
 
@@ -116,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.background = 'linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)';
-        canvas.style.backgroundSize = '4px 4px'; // Much smaller background size for finer grid
+        canvas.style.backgroundSize = '4px 4px';
         canvas.style.animation = 'wave 20s linear infinite';
 
         const style = document.createElement('style');
@@ -135,10 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-// Call this function when your page loads
     init();
 
-// Handle window resizing
     window.addEventListener('resize', () => {
         if (camera && renderer) {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -148,13 +148,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     addScrewsToContainer();
+
+    function updateVersionLabel(isWebGLEnabled) {
+        const webglStatus = document.getElementById('webgl-status');
+        if (webglStatus) {
+            if (isWebGLEnabled) {
+                webglStatus.textContent = '.WebGL';
+                webglStatus.style.color = '#4CAF50';
+            } else {
+                webglStatus.textContent = '.CSS';
+                webglStatus.style.color = '#FF5252';
+            }
+        }
+    }
+
     const melody = [
         'A4', 'B4', 'G#4', 'A4', 'G#4', 'E4', 'F#4',
         'C#4', 'E4', 'B4', 'G#4', 'A4', 'G#4', 'E4',
         'A4', 'A4', 'A4', 'G#4', 'E4'
     ];
     let noteIndex = 0;
-    const message = "NOTHINGQUITELIKEYOU";
+    const message = "NOTHINGQUITELIKEHER";
     const activeNotes = {};
 
     let audioContext;
@@ -199,17 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Audio loaded and decoded');
         })
         .catch(error => console.error('Error loading audio:', error));
-
-    // const reverb = new Tone.Reverb({
-    //     decay: 1.5,
-    //     // preDelay: 0.005,
-    //     wet: 0.03
-    // }).toDestination();
-    //
-    // const delay = new Tone.FeedbackDelay({
-    //     delayTime: '4n',
-    //     feedback: 0.07
-    // }).connect(reverb);
 
     const synth = new Tone.Synth({
         oscillator: {
@@ -365,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startThumping() {
         const keys = document.querySelectorAll('.key');
         keys.forEach(key => key.classList.add('thumping'));
+        document.querySelector('.key-container').classList.add('thumping');
     }
 
     function stopThumping() {
@@ -471,7 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(endShake, 3900 + Math.random() * 500);
         }
 
-        // Start the shaking
         endShake();
 
         setTimeout(() => {
@@ -516,14 +519,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const elapsed = currentTime - startTime;
             if (elapsed < duration) {
-                if (Math.random() < 0.7) {
+                if (Math.random() < 0.8) {
                     overlay.style.opacity = '1';
                     setTimeout(() => {
                         if (isEffectActive) overlay.style.opacity = '0';
                     }, Math.random() * 50 + 20);
                 }
 
-                if (Math.random() < 0.5) {
+                if (Math.random() < 0.7) {
                     const hue = Math.floor(Math.random() * 360);
                     overlay.style.backgroundColor = `hsl(${hue}, 150%, 80%)`;
                     overlay.style.mixBlendMode = 'difference';
@@ -564,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const keys = document.querySelectorAll('.key');
         const numKeys = keys.length;
 
-        const numAffectedKeys = Math.floor(Math.random() * 2) + 1;
+        const numAffectedKeys = Math.floor(Math.random() * 3) + 2;
 
         for (let i = 0; i < numAffectedKeys; i++) {
             const randomIndex = Math.floor(Math.random() * numKeys);
