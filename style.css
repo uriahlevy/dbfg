@@ -1,17 +1,100 @@
 body {
     display: flex;
-    --iridescent-opacity: 0.1;
+    --iridescent-opacity: 0;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background: #150021;
     font-family: 'Montserrat', sans-serif;
-    position: relative;
+    background: linear-gradient(to bottom right, #2304be, #3b003f, #36047a, #9d2f00);
     overflow: hidden;
-    isolation: isolate;
-    background: linear-gradient(160deg, #1a0227 0%, #2f034b 30%, #4b067a 70%, #6b08aa 100%);
+}
 
+.iridescent-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: var(--iridescent-opacity, 0);
+    mix-blend-mode: overlay;
+    background: linear-gradient(to bottom right, #2800ff, #f100ff, #0194e0, #1fe001);
+    background-size: 100% 100%;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+#holographic-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#webgl-instructions {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    max-width: 300px;
+    box-shadow: 0 0 10px rgba(212, 142, 255, 0.3);
+    z-index: 1000;
+}
+
+#webgl-instructions h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #D48EFF;
+}
+
+#webgl-instructions p {
+    margin: 0 0 10px;
+}
+
+#webgl-instructions ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#webgl-instructions code {
+    background: rgba(212, 142, 255, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+#webgl-instructions button {
+    z-index: 10;
+    padding: 8px 16px;
+    font-size: 14px;
+    width: 100%;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(to right, #D48EFF, #FF69B4);
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+#webgl-instructions button:hover {
+    opacity: 0.8;
 }
 
 .container {
@@ -25,11 +108,21 @@ body {
 }
 
 @keyframes jitter {
-    0% { box-shadow: 0 0 5px rgba(212, 142, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.1); }
-    25% { box-shadow: 0 0 15px rgba(212, 142, 255, 0.3), 2px 2px 0 1px rgba(255, 255, 255, 0.1); }
-    50% { box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px 2px 0 1px rgba(255, 255, 255, 0.1); }
-    75% { box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), -2px -2px 0 1px rgba(255, 255, 255, 0.1); }
-    100% { box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), 2px -2px 0 1px rgba(255, 255, 255, 0.1); }
+    0% {
+        box-shadow: 0 0 5px rgba(212, 142, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+    25% {
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.3), 2px 2px 0 1px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px 2px 0 1px rgba(255, 255, 255, 0.1);
+    }
+    75% {
+        box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), -2px -2px 0 1px rgba(255, 255, 255, 0.1);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), 2px -2px 0 1px rgba(255, 255, 255, 0.1);
+    }
 }
 
 .key-container {
@@ -62,7 +155,7 @@ body {
     height: 12px;
     background-color: #808080;
     border-radius: 50%;
-    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 .screw::before,
@@ -88,20 +181,36 @@ body {
     transform: translate(-50%, -50%);
 }
 
-.screw-top-left { top: 5px; left: 5px; }
-.screw-top-right { top: 5px; right: 5px; }
-.screw-bottom-left { bottom: 5px; left: 5px; }
-.screw-bottom-right { bottom: 5px; right: 5px; }
+.screw-top-left {
+    top: 5px;
+    left: 5px;
+}
+
+.screw-top-right {
+    top: 5px;
+    right: 5px;
+}
+
+.screw-bottom-left {
+    bottom: 5px;
+    left: 5px;
+}
+
+.screw-bottom-right {
+    bottom: 5px;
+    right: 5px;
+}
 
 .screw-top-right {
     background-color: #333;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
 }
 
 .screw-top-right::before,
 .screw-top-right::after {
     display: none;
 }
+
 .key {
     display: inline-block;
     background: none;
@@ -130,10 +239,9 @@ body {
     text-shadow: none;
     opacity: 0.6;
     transform: scale(0.95);
-    animation: 
-        press-effect 0.3s ease-out,
-        neon-flicker 1.5s infinite alternate,
-        fall-effect 1s ease-in-out infinite;
+    animation: press-effect 0.3s ease-out,
+    neon-flicker 1.5s infinite alternate
+    /*fall-effect 1s ease-in-out infinite;*/
 }
 
 .key.pressed::after {
@@ -162,25 +270,31 @@ body {
 }
 
 @keyframes border-flicker {
-    0% { 
+    0% {
         opacity: 1;
         box-shadow: 0 0 5px #D48EFF, 0 0 10px #D48EFF;
     }
-    100% { 
+    100% {
         opacity: 0.3;
         box-shadow: none;
     }
 }
 
-@keyframes fall-effect {
-    0%, 100% { transform: translateY(0) scale(0.95); }
-    50% { transform: translateY(10px) scale(0.95); }
-}
+/*@keyframes fall-effect {*/
+/*    0%, 100% { transform: translateY(0) scale(0.95); }*/
+/*    50% { transform: translateY(10px) scale(0.95); }*/
+/*}*/
 
 @keyframes press-effect {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.9); }
-    100% { transform: scale(0.95); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(0.95);
+    }
 }
 
 .key.thumping {
@@ -190,9 +304,7 @@ body {
 .invisible {
     opacity: 0;
     pointer-events: none;
-    /* This prevents the button from being clickable when invisible */
     transition: opacity 0.5s ease;
-    /* This adds a smooth fade-out effect */
 }
 
 @keyframes neon-pulse {
@@ -239,6 +351,8 @@ body {
 
 #start-audio,
 #reset-melody {
+    position: relative;
+    z-index: 10;
     padding: 8px 16px;
     font-size: 14px;
     color: #fff;
@@ -277,7 +391,7 @@ body {
     opacity: 0.7;
     transition: all 0.3s ease;
     text-shadow: 0 0 5px #D48EFF;
-    animation: pulse-opacity 4s infinite alternate;
+    animation: pulse-opacity 10s infinite alternate;
 }
 
 .volume-label::before {
@@ -329,72 +443,6 @@ body {
     100% {
         opacity: 0.9;
     }
-}
-
-body::before,
-body::after,
-.iridescent-layer {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-        radial-gradient(circle, rgba(255, 0, 255, 0.5), transparent 60%),
-        radial-gradient(circle, rgba(1, 162, 162, 0.5), transparent 20%),
-        /* radial-gradient(circle, rgba(255, 255, 0, 0.5), transparent 30%), */
-        /* linear-gradient(145deg, rgba(255, 0, 255, 0.4), rgba(0, 255, 0, 0.4)), */
-        /* linear-gradient(235deg, rgba(0, 0, 255, 0.4), rgba(255, 165, 0, 0.4)), */
-        linear-gradient(315deg, rgba(238, 130, 238, 0.35), rgba(255, 20, 147, 0.35));
-        background-size: 150% 150%;
-    opacity: var(--iridescent-opacity);
-    mix-blend-mode: overlay;
-    background: linear-gradient(
-        45deg, 
-        rgba(255, 0, 255, 0.3), 
-        rgba(0, 255, 255, 0.3), 
-        rgba(255, 255, 0, 0.3), 
-        rgba(255, 20, 147, 0.3)
-    );
-    background-size: 400% 400%;
-}
-
-@keyframes moveBackground {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Glitch effect styles */
-@keyframes quick-glitch {
-    0% {
-        transform: translate(0);
-    }
-
-    20% {
-        transform: translate(-2px, 2px);
-    }
-
-    40% {
-        transform: translate(-2px, -2px);
-    }
-
-    60% {
-        transform: translate(2px, 2px);
-    }
-
-    80% {
-        transform: translate(2px, -2px);
-    }
-
-    100% {
-        transform: translate(0);
-    }
-}
-
-.glitch-effect {
-    animation: quick-glitch 0.2s ease-in-out 3;
 }
 
 @keyframes horizontal-shift {
@@ -496,7 +544,7 @@ body::after,
 }
 
 .screen-shake {
-    animation: shake 0.2s cubic-bezier(.36, .07, .19, .97) both;
+    animation: shake 0.1s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 .end-text {
@@ -541,5 +589,5 @@ body::after,
 }
 
 .key.bad-bulb {
-    animation: badBulb 0.7s ease-in-out;
+    animation: badBulb 0.2s ease-in-out;
 }

@@ -1,18 +1,152 @@
-
 document.addEventListener('DOMContentLoaded', () => {
-    function addScrewsToContainer() {
-        const wrapper = document.querySelector('.key-container-wrapper');
-        const screwPositions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    let renderer, scene, camera, waveObject;
+    const waveSpeed = 0.0003; // Slightly slower for smoother animation
+    const waveHeight = 0.65; // Increased for more dramatic movement
 
-        screwPositions.forEach(position => {
-            const screw = document.createElement('div');
-            screw.className = `screw screw-${position}`;
-            wrapper.appendChild(screw);
+    function isWebGLAvailable() {
+        try {
+            const canvas = document.createElement('canvas');
+            return !!(window.WebGLRenderingContext &&
+                (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function showWebGLInstructions() {
+        const instructionsElement = document.getElementById('webgl-instructions');
+        if (instructionsElement) {
+            instructionsElement.style.display = 'block';
+        }
+    }
+
+    function initRenderer() {
+        if (isWebGLAvailable()) {
+            try {
+                renderer = new THREE.WebGLRenderer({
+                    canvas: document.getElementById('holographic-background'),
+                    alpha: true,
+                    antialias: true // Added for smoother lines
+                });
+            } catch (e) {
+                console.warn("WebGL initialization failed, falling back to CSS3DRenderer");
+                showWebGLInstructions();
+                return tryCSS3DRenderer();
+            }
+        } else {
+            console.warn("WebGL not supported, falling back to CSS3DRenderer");
+            showWebGLInstructions();
+            return tryCSS3DRenderer();
+        }
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio); // For sharper rendering
+        return true;
+    }
+
+    function tryCSS3DRenderer() {
+        try {
+            renderer = new THREE.CSS3DRenderer();
+            renderer.domElement.style.position = 'absolute';
+            renderer.domElement.style.top = '0';
+            document.body.appendChild(renderer.domElement);
+            return true;
+        } catch (e) {
+            console.warn("CSS3DRenderer not supported, falling back to CSS animation");
+            useCSSFallback();
+            return false;
+        }
+    }
+
+// The rest of your code (initScene, animate, etc.) remains the same
+    function initScene() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 0.5;
+
+        const geometry = new THREE.PlaneGeometry(3, 3, 400, 400); // Increased to 800x800 for an even finer mesh
+        // Increased to 500x500 for much finer mesh
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.04, // Reduced opacity for subtler effect
+            wireframe: true
         });
+
+        waveObject = new THREE.Mesh(geometry, material);
+        scene.add(waveObject);
+
+
+        animate();
     }
 
 
-    // Call this function after your container is created or when the DOM is loaded
+    function init() {
+        if (initRenderer()) {
+            initScene();
+        }
+    }
+
+// Call this function when your page loads
+
+    init();
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        const time = Date.now() * waveSpeed;
+
+        const position = waveObject.geometry.attributes.position;
+        const array = position.array;
+
+        for (let i = 0; i < array.length; i += 3) {
+            array[i + 2] = Math.sin(array[i] * 3 + time) * Math.cos(array[i + 1] * 3 + time) * waveHeight;
+        }
+
+        position.needsUpdate = true;
+
+        renderer.render(scene, camera);
+    }
+
+    function useCSSFallback() {
+        const canvas = document.getElementById('holographic-background');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.background = 'linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)';
+        canvas.style.backgroundSize = '4px 4px'; // Much smaller background size for finer grid
+        canvas.style.animation = 'wave 20s linear infinite';
+
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes wave {
+            0% { background-position: 0 0; }
+            100% { background-position: 80px 80px; }
+        }
+    `;
+        document.head.appendChild(style);
+    }
+
+    function init() {
+        if (initRenderer()) {
+            initScene();
+        }
+    }
+
+// Call this function when your page loads
+    init();
+
+// Handle window resizing
+    window.addEventListener('resize', () => {
+        if (camera && renderer) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+    });
     addScrewsToContainer();
     const melody = [
         'A4', 'B4', 'G#4', 'A4', 'G#4', 'E4', 'F#4',
@@ -34,6 +168,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const glitchAudio = new Audio('glitch_short.wav');
     const crackleAudio = new Audio('crackles.wav')
 
+    function addScrewsToContainer() {
+        const wrapper = document.querySelector('.key-container-wrapper');
+        const screwPositions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+
+        screwPositions.forEach(position => {
+            const screw = document.createElement('div');
+            screw.className = `screw screw-${position}`;
+            wrapper.appendChild(screw);
+        });
+    }
 
     function playAudioSample(audio) {
         if (audio.paused) {
@@ -56,29 +200,29 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error loading audio:', error));
 
-    const reverb = new Tone.Reverb({
-        decay: 1.5,
-        preDelay: 0.005,
-        wet: 0.35
-    }).toDestination();
-
-    const delay = new Tone.FeedbackDelay({
-        delayTime: '4n',
-        feedback: 0.25
-    }).connect(reverb);
+    // const reverb = new Tone.Reverb({
+    //     decay: 1.5,
+    //     // preDelay: 0.005,
+    //     wet: 0.03
+    // }).toDestination();
+    //
+    // const delay = new Tone.FeedbackDelay({
+    //     delayTime: '4n',
+    //     feedback: 0.07
+    // }).connect(reverb);
 
     const synth = new Tone.Synth({
         oscillator: {
             type: 'sawtooth'
         },
         envelope: {
-            attack: 0.000,
+            attack: 0.001,
             decay: 0.8,
-            sustain: 0.8,
-            release: 0
+            sustain: 0.9,
+            release: 0.01
         },
-        portamento: 0.07
-    }).connect(delay);
+        portamento: 0.1
+    }).toDestination();
 
     const analyser = new Tone.Analyser('waveform', 1024);
     synth.connect(analyser);
@@ -115,12 +259,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (noteIndex >= melody.length) {
                 setTimeout(() => {
                     applyGlitchEffect();
-                    setTimeout(() => {
-                        resetMelody();
-                        displayAllKeys();
-                        playEndAudio();
-                    }, 200);
-                }, 200);
+                    resetMelody();
+                    displayAllKeys();
+                    playEndAudio();
+                }, 800);
+
             } else {
                 displayNextKey(noteIndex);
             }
@@ -146,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reset-melody').addEventListener('click', resetMelody);
 
     function resetMelody() {
+        console.log('resetMelody called');
         isMelodyCompleted = false;
         synth.triggerRelease();
         noteIndex = 0;
@@ -272,8 +416,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             startThumping();
 
-            setTimeout(applyGlitchEffect, 200);
-
             setTimeout(() => {
                 stopThumping();
             }, duration * 1000);
@@ -300,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(playRandomGlitch, randomDelay);
             }
         }
+
         playRandomGlitch()
     }
 
@@ -380,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, Math.random() * 50 + 20);
                 }
 
-                if (Math.random() < 0.7) {
+                if (Math.random() < 0.5) {
                     const hue = Math.floor(Math.random() * 360);
                     overlay.style.backgroundColor = `hsl(${hue}, 150%, 80%)`;
                     overlay.style.mixBlendMode = 'difference';
@@ -414,14 +557,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchToLightMode() {
         console.log("turn on the lights")
-        setIridescentOpacity(0.8)
+        setIridescentOpacity(1.0)
     }
 
     function applyBadBulbEffect() {
         const keys = document.querySelectorAll('.key');
         const numKeys = keys.length;
 
-        const numAffectedKeys = Math.floor(Math.random() * 4) + 2;
+        const numAffectedKeys = Math.floor(Math.random() * 2) + 1;
 
         for (let i = 0; i < numAffectedKeys; i++) {
             const randomIndex = Math.floor(Math.random() * numKeys);
@@ -431,9 +574,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 key.classList.remove('bad-bulb');
-            }, 700);
+            }, 300);
         }
-        const nextEffectDelay = Math.random() * 1000 + 500;
+        const nextEffectDelay = Math.random() * 2000 + 500;
         setTimeout(applyBadBulbEffect, nextEffectDelay);
     }
 
@@ -451,19 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function flicker() {
             elementsToShake.forEach(el => {
                 el.classList.add('screen-shake');
-                setTimeout(() => el.classList.remove('screen-shake'), 200);
+                setTimeout(() => el.classList.remove('screen-shake'), 80);
             });
-
-            if (Math.random() < 0.8) {
-                const hue = Math.floor(Math.random() * 360);
-                flickerElement.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
-                flickerElement.style.mixBlendMode = 'difference';
-                flickerElement.style.opacity = '0.5';
-            } else {
-                flickerElement.style.backgroundColor = 'black';
-                flickerElement.style.mixBlendMode = 'normal';
-                flickerElement.style.opacity = '0.2';
-            }
 
             flickerElement.style.display = 'block';
 
@@ -474,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 flickerElement.style.opacity = '';
             }, 100);
 
-            const nextFlickerTime = 2000 + Math.random() * 500;
+            const nextFlickerTime = 3500 + Math.random() * 500;
             setTimeout(flicker, nextFlickerTime);
         }
 
