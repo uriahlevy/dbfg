@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'A4', 'A4', 'A4', 'G#4', 'E4'
     ];
     let noteIndex = 0;
-    const message = "NOTHINGQUITELIKEHER";
+    const message = "ABCDEFGHIJKLMNOPQRS";
     const activeNotes = {};
 
     let audioContext;
