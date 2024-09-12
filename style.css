@@ -6,8 +6,8 @@ body {
     height: 100vh;
     margin: 0;
     font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(to bottom right, #2304be, #3b003f, #36047a, #9d2f00);
     overflow: hidden;
+    background: radial-gradient(circle at center, #2800ff, #69016e, #480026, #190046);
 }
 
 .iridescent-layer {
@@ -17,11 +17,16 @@ body {
     right: 0;
     bottom: 0;
     opacity: var(--iridescent-opacity, 0);
-    mix-blend-mode: overlay;
-    background: linear-gradient(to bottom right, #2800ff, #f100ff, #0194e0, #1fe001);
+    mix-blend-mode: screen;
+    background: conic-gradient(from 45deg, #2800ff, #910098, #008667, #171717, #2800ff);
     background-size: 100% 100%;
     pointer-events: none;
-    transition: opacity 0.8s ease;
+    /*transition: opacity 0.8s ease;*/
+}
+
+.upsidedown {
+    display: inline-block;
+    transform: rotate(180deg);
 }
 
 #holographic-background {
@@ -123,26 +128,26 @@ html, body {
 
 @keyframes jitter {
     0% {
-        box-shadow: 0 0 5px rgba(212, 142, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.82), 0 0 0 1px rgba(255, 255, 255, 0.1);
     }
     25% {
-        box-shadow: 0 0 15px rgba(212, 142, 255, 0.3), 2px 2px 0 1px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.78), 2px 2px 0 1px rgba(255, 255, 255, 0.1);
     }
     50% {
-        box-shadow: 0 0 30px rgba(212, 142, 255, 0.3), -2px 2px 0 1px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.82), -2px 2px 0 1px rgba(255, 255, 255, 0.1);
     }
     75% {
-        box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), -2px -2px 0 1px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.79), -2px -2px 0 1px rgba(255, 255, 255, 0.1);
     }
     100% {
-        box-shadow: 0 0 10px rgba(212, 142, 255, 0.3), 2px -2px 0 1px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(212, 142, 255, 0.84), 2px -2px 0 1px rgba(255, 255, 255, 0.1);
     }
 }
 
 .key-container {
     padding: 30px;
     filter: url('#turbulence');
-    animation: jitter 0.9s infinite;
+    animation: jitter 1.2s infinite;
     color: #fff;
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.05);
@@ -157,6 +162,7 @@ html, body {
     position: relative;
     transform: rotate(3deg);
     transform-origin: top right;
+    filter: url('#turbulence');
     transition: transform 0.3s ease;
 }
 
@@ -166,9 +172,10 @@ html, body {
 
 .screw {
     position: absolute;
+    filter: url('#turbulence');
     width: 12px;
     height: 12px;
-    background-color: #808080;
+    background-color: #b08d00;
     border-radius: 50%;
     box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
 }
