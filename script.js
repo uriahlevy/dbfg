@@ -290,22 +290,54 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error loading audio:', error));
 
+    const envelope = {
+        attack: 0.001,
+        decay: 0.8,
+        sustain: 0.9,
+        release: 0.01
+    };
+
+    const detuneAmount = 15;
+    const tremoloFrequency = 4;
+    const tremoloDepth = 10;
+
     const synth = new Tone.Synth({
         oscillator: {
-            type: 'sawtooth'
+            type: 'sawtooth',
+            detune: -detuneAmount,
         },
-        envelope: {
-            attack: 0.001,
-            decay: 0.8,
-            sustain: 0.9,
-            release: 0.01
-        },
+        envelope: envelope,
         portamento: 0.1
     }).toDestination();
 
-    const analyser = new Tone.Analyser('waveform', 1024);
-    synth.connect(analyser);
+    const synthHigh = new Tone.Synth({
+        oscillator: {
+            type: 'square',
+            detune: detuneAmount,
+        },
+        envelope: envelope,
+        portamento: 0.1
+    }).toDestination();
 
+    synthHigh.volume.value = -7;
+
+    const tremoloLow = new Tone.LFO({
+        frequency: tremoloFrequency,
+        min: -tremoloDepth,
+        max: tremoloDepth,
+        type: 'sine'
+    }).start();
+
+    const tremoloHigh = new Tone.LFO({
+        frequency: tremoloFrequency * 1.1,
+        min: -tremoloDepth,
+        max: tremoloDepth,
+        type: 'sine'
+    }).start();
+
+// Connect LFOs to synth detune
+    tremoloLow.connect(synth.detune);
+    tremoloHigh.connect(synthHigh.detune);
     async function startAudio() {
         if (Tone.context.state !== 'running') {
             await Tone.start();
@@ -318,19 +350,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let activeNote = null;
+    let activeHigherNote = null;
     let isMelodyCompleted = false;
     applyBadBulbEffect();
 
     document.addEventListener('keydown', async (event) => {
         const key = event.key.toUpperCase();
+        const note = melody[noteIndex];
 
         await startAudio();
 
         if (noteIndex < melody.length && key === message[noteIndex]) {
-            const note = melody[noteIndex];
-            synth.triggerRelease();
-            synth.triggerAttack(note);
+            const noteOctave = note.slice(0, -1);
+            const octaveNumber = parseInt(note.slice(-1));
+            const higherOctave = noteOctave + (octaveNumber + 1);
+
+            synth.triggerAttackRelease(note);
+            synthHigh.triggerAttackRelease(higherOctave);
+
             activeNote = note;
+            activeHigherNote = higherOctave;
 
             highlightAndGreyOutKey(noteIndex);
             noteIndex++;
@@ -357,11 +396,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function stopNote() {
+        if (activeNote) {
+            synth.triggerRelease();
+            synthHigh.triggerRelease();
+            activeNote = null;
+            activeHigherNote = null;
+        }
+    }
+
     document.addEventListener('keyup', (event) => {
         const key = event.key.toUpperCase();
         if (key === message[noteIndex - 1]) {
-            synth.triggerRelease();
-            activeNote = null;
+            stopNote();
         }
     });
 
@@ -371,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('resetMelody called');
         isMelodyCompleted = false;
         synth.triggerRelease();
+        synthHigh.triggerRelease();
         noteIndex = 0;
         Object.keys(activeNotes).forEach(key => delete activeNotes[key]);
         resetKeys();
