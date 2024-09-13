@@ -1,5 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let renderer, scene, camera, waveObject;
+    function isMobileDevice() {
+        console.log('Window inner width:', window.innerWidth);
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Max Touch Points:', navigator.maxTouchPoints);
+        // Check if touch is supported
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            // Additional check for iOS devices
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                return true;
+            }
+
+            // Check for Android and other mobile devices
+            if (/Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                return true;
+            }
+
+            // Check screen size (use a larger value for high-res screens)
+            if (window.innerWidth <= 1024) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function showMobileMessage() {
+        const divToHide = document.querySelector('.key-container-wrapper');
+        if (divToHide) {
+            divToHide.style.display = 'none';
+        }
+        const mobileMessageElement = document.getElementById('mobile-message');
+        if (mobileMessageElement) {
+            mobileMessageElement.style.display = 'block';
+        }
+    }
 
     function isWebGLAvailable() {
         try {
@@ -180,47 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init();
 
-    function isMobileDevice() {
-        console.log('Window inner width:', window.innerWidth);
-        console.log('User Agent:', navigator.userAgent);
-        console.log('Max Touch Points:', navigator.maxTouchPoints);
-        // Check if touch is supported
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            // Additional check for iOS devices
-            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                return true;
-            }
-
-            // Check for Android and other mobile devices
-            if (/Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                return true;
-            }
-
-            // Check screen size (use a larger value for high-res screens)
-            if (window.innerWidth <= 1024) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function showMobileMessage() {
-        const divToHide = document.querySelector('.key-container-wrapper');
-        if (divToHide) {
-            divToHide.style.display = 'none';
-        }
-        const mobileMessageElement = document.getElementById('mobile-message');
-        if (mobileMessageElement) {
-            mobileMessageElement.style.display = 'block';
-        }
-    }
-
     function animate() {
         requestAnimationFrame(animate);
-
         waveObject.material.uniforms.time.value += 0.01;
-
         renderer.render(scene, camera);
     }
 
@@ -244,14 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
         document.head.appendChild(style);
     }
-
-    function init() {
-        if (initRenderer()) {
-            initScene();
-        }
-    }
-
-    init();
 
     window.addEventListener('resize', () => {
         if (camera && renderer) {
