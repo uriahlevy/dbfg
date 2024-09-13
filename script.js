@@ -251,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioBuffer;
     let audioSource;
     let audioPlayed = false;
+    startAudio();
     setupScreenFlicker()
 
     const kickAudio = document.querySelector('audio[data-key="kick"]');
@@ -338,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Connect LFOs to synth detune
     tremoloLow.connect(synth.detune);
     tremoloHigh.connect(synthHigh.detune);
+
     async function startAudio() {
         if (Tone.context.state !== 'running') {
             await Tone.start();
@@ -356,9 +358,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', async (event) => {
         const key = event.key.toUpperCase();
-        const note = melody[noteIndex];
 
-        await startAudio();
+        const note = melody[noteIndex];
 
         if (noteIndex < melody.length && key === message[noteIndex]) {
             const noteOctave = note.slice(0, -1);
