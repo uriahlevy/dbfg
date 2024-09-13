@@ -171,12 +171,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function init() {
-        if (initRenderer()) {
+        if (isMobileDevice()) {
+            showMobileMessage();
+        } else if (initRenderer()) {
             initScene();
         }
     }
 
     init();
+
+    function isMobileDevice() {
+        // Check screen width
+        if (window.innerWidth <= 800) {
+            return true;
+        }
+
+        // Check user agent string
+        const mobileKeywords = [
+            'Android',
+            'webOS',
+            'iPhone',
+            'iPad',
+            'iPod',
+            'BlackBerry',
+            'Windows Phone',
+            'Opera Mini',
+            'IEMobile',
+            'Mobile',
+            'Pixel'
+        ];
+
+        return mobileKeywords.some(keyword => navigator.userAgent.indexOf(keyword) !== -1);
+    }
+
+    function showMobileMessage() {
+        const divToHide = document.querySelector('.key-container-wrapper');
+        if (divToHide) {
+            divToHide.style.display = 'none';
+        }
+        const mobileMessageElement = document.getElementById('mobile-message');
+        if (mobileMessageElement) {
+            mobileMessageElement.style.display = 'block';
+        }
+    }
 
     function animate() {
         requestAnimationFrame(animate);
