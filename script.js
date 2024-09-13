@@ -26,8 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showMobileMessage() {
         const divToHide = document.querySelector('.key-container-wrapper');
+        const volumeLabelToHide = document.querySelector('.volume-label');
+        const resetMelodyToHide = document.getElementById('reset-melody');
+        const startAudioToHide = document.getElementById('start-audio');
         if (divToHide) {
             divToHide.style.display = 'none';
+            resetMelodyToHide.style.display = 'none';
+            startAudioToHide.style.display = 'none';
+            volumeLabelToHide.style.display = 'none';
         }
         const mobileMessageElement = document.getElementById('mobile-message');
         if (mobileMessageElement) {
