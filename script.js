@@ -181,27 +181,28 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
 
     function isMobileDevice() {
-        // Check screen width
-        if (window.innerWidth <= 800) {
-            return true;
+        console.log('Window inner width:', window.innerWidth);
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Max Touch Points:', navigator.maxTouchPoints);
+        // Check if touch is supported
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            // Additional check for iOS devices
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                return true;
+            }
+
+            // Check for Android and other mobile devices
+            if (/Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                return true;
+            }
+
+            // Check screen size (use a larger value for high-res screens)
+            if (window.innerWidth <= 1024) {
+                return true;
+            }
         }
 
-        // Check user agent string
-        const mobileKeywords = [
-            'Android',
-            'webOS',
-            'iPhone',
-            'iPad',
-            'iPod',
-            'BlackBerry',
-            'Windows Phone',
-            'Opera Mini',
-            'IEMobile',
-            'Mobile',
-            'Pixel'
-        ];
-
-        return mobileKeywords.some(keyword => navigator.userAgent.indexOf(keyword) !== -1);
+        return false;
     }
 
     function showMobileMessage() {
