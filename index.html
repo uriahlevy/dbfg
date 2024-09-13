@@ -16,36 +16,36 @@
 
 <div class="container">
     <div class="volume-label">Volume Up</div>
-    <div class="version-label">dbfg.club v2.0.2 <span id="webgl-status"></span></div>
+    <div class="version-label">dbfg.club v2.0.0.rev1 <span id="webgl-status"></span></div>
     <div class="iridescent-layer"></div>
     <div class="key-container-wrapper">
         <div class="key-container">
             <div class="word">
                 <span class="key" data-key="0">N</span>
                 <span class="key" data-key="1">O</span>
-                <span class="key upsidedown" data-key="2">T</span>
-                <span class="key" data-key="3">H</span>
-                <span class="key" data-key="4">I</span>
-                <span class="key" data-key="5">N</span>
-                <span class="key" data-key="6">G</span>
             </div>
             <div class="word">
-                <span class="key" data-key="7">Q</span>
-                <span class="key upsidedown" data-key="8">U</span>
-                <span class="key" data-key="9">I</span>
-                <span class="key" data-key="10">T</span>
-                <span class="key" data-key="11">E</span>
+                <span class="key upsidedown" data-key="2">F</span>
+                <span class="key" data-key="3">E</span>
+                <span class="key" data-key="4">E</span>
+                <span class="key" data-key="5">L</span>
+                <span class="key" data-key="6">I</span>
+                <span class="key" data-key="7">N</span>
+                <span class="key upsidedown" data-key="8">G</span>
             </div>
             <div class="word">
-                <span class="key" data-key="12">L</span>
-                <span class="key" data-key="13">I</span>
-                <span class="key upsidedown" data-key="14">K</span>
-                <span class="key" data-key="15">E</span>
+                <span class="key" data-key="9">C</span>
+                <span class="key" data-key="10">O</span>
+                <span class="key" data-key="11">M</span>
+                <span class="key" data-key="12">E</span>
+                <span class="key" data-key="13">S</span>
             </div>
             <div class="word">
-                <span class="key" data-key="16">H</span>
-                <span class="key upsidedown" data-key="17">E</span>
-                <span class="key" data-key="18">R</span>
+                <span class="key upsidedown" data-key="14">C</span>
+                <span class="key" data-key="15">L</span>
+                <span class="key" data-key="16">O</span>
+                <span class="key upsidedown" data-key="17">S</span>
+                <span class="key" data-key="18">E</span>
             </div>
             <div class="word">
                 <button class="key" data-key="kick">boom</button>
@@ -55,7 +55,6 @@
                 <audio data-key="kick" src="kick.wav"></audio>
                 <audio data-key="snare" src="snare.wav"></audio>
             </div>
-
         </div>
     </div>
     <div class="button-container">
@@ -65,7 +64,8 @@
 </div>
 <div id="mobile-message" style="display: none;">
     <h2>Mobile Device</h2>
-    <p>This dbfg.club version (v2.0.2) requires a keyboard to interact with the page, so you'll need to use your laptop. If you got here using the QR code, it's because I don't always think things through...</p>
+    <p>This dbfg.club version (v2.0.0.rev1) requires a keyboard to interact with the page, so you'll need to use your laptop.
+        If you got here using the QR code, it's because I don't always think things through...</p>
 </div>
 <div id="webgl-instructions" style="display: none;">
     <h2>Enable Graphics Acceleration</h2>
@@ -81,12 +81,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/renderers/CSS3DRenderer.js"></script>
 <script src="script.js"></script>
-    <svg style="display: none;">
-        <filter id="turbulence">
-            <feTurbulence type="fractalNoise" baseFrequency="0.08 0.05" numOctaves="2" seed="1" stitchTiles="stitch"/>
-            <feDisplacementMap in="SourceGraphic" scale="3" />
-        </filter>
-    </svg>
+<svg style="display: none;">
+    <filter id="turbulence">
+        <feTurbulence type="fractalNoise" baseFrequency="0.08 0.05" numOctaves="2" seed="1" stitchTiles="stitch"/>
+        <feDisplacementMap in="SourceGraphic" scale="3"/>
+    </filter>
+</svg>
 </body>
 
 </html>
