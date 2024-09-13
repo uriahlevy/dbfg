@@ -306,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (audio.paused) {
             audio.currentTime = 0;
             audio.play();
+            dataLayer.push({
+                'event': 'song_played',
+                'event_category': 'engagement'
+            });
         } else {
             audio.currentTime = 0;
         }
@@ -389,8 +393,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyBadBulbEffect();
 
     document.addEventListener('keydown', async (event) => {
+        dataLayer.push({
+            'event': 'keyboard_key_pressed',
+            'event_category': 'engagement'
+        });
         const key = event.key.toUpperCase();
-
         const note = melody[noteIndex];
 
         if (noteIndex < melody.length && key === message[noteIndex]) {
@@ -408,6 +415,10 @@ document.addEventListener('DOMContentLoaded', () => {
             noteIndex++;
 
             if (noteIndex >= melody.length) {
+                dataLayer.push({
+                    'event': 'melody_completed',
+                    'event_category': 'engagement'
+                });
                 setTimeout(() => {
                     applyGlitchEffect();
                     resetMelody();
@@ -448,6 +459,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reset-melody').addEventListener('click', resetMelody);
 
     function resetMelody() {
+        dataLayer.push({
+            'event': 'melody_reset',
+            'event_category': 'engagement'
+        });
         console.log('resetMelody called');
         isMelodyCompleted = false;
         synth.triggerRelease();
@@ -608,6 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function endSequence() {
+        dataLayer.push({
+            'event': 'sequence_end_played',
+            'event_category': 'engagement'
+        });
         const fadeOut = document.createElement('div');
         fadeOut.className = 'fade-out';
         document.body.appendChild(fadeOut);
@@ -716,6 +735,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchToLightMode() {
+        dataLayer.push({
+            'event': 'light_mode_switched_on',
+            'event_category': 'engagement'
+        });
         console.log("turn on the lights")
         setIridescentOpacity(1.0)
     }
