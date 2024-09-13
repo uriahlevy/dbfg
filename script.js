@@ -44,14 +44,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function isWebGLAvailable() {
         try {
             const canvas = document.createElement('canvas');
-            return !!(window.WebGLRenderingContext &&
+            let webglAvailable = !!(window.WebGLRenderingContext &&
                 (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+            dataLayer.push({
+                'event': 'webgl_available',
+                'event_category': 'engagement'
+            });
+            return webglAvailable;
         } catch (e) {
+            dataLayer.push({
+                'event': 'webgl_unavailable',
+                'event_category': 'engagement'
+            });
             return false;
         }
     }
 
     function showWebGLInstructions() {
+        dataLayer.push({
+            'event': 'webgl_instructions_shown',
+            'event_category': 'engagement'
+        });
         const divToHide = document.querySelector('.key-container-wrapper');
         if (divToHide) {
             divToHide.style.display = 'none';
