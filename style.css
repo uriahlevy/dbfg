@@ -198,6 +198,7 @@ html, body {
     transform: rotate(-21deg);
     transform-origin: top right;
     filter: url('#turbulence');
+    text-shadow: 0 0 5px #D48EFF;
     transition: transform 0.3s ease;
 }
 
@@ -206,11 +207,6 @@ html, body {
 }
 
 .key-container-wrapper {
-    transition: transform 0.5s ease;
-}
-
-.key-container-wrapper {
-    position: relative;
     transition: transform 0.5s ease;
 }
 
