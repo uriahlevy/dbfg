@@ -335,8 +335,39 @@ document.addEventListener('DOMContentLoaded', () => {
         screwPositions.forEach(position => {
             const screw = document.createElement('div');
             screw.className = `screw screw-${position}`;
+
+            if (position === 'top-left' || position === 'bottom-left' || position === 'bottom-right') {
+                screw.classList.add('screw-missing');
+            } else {
+                screw.classList.add('screw-present');
+            }
+
             wrapper.appendChild(screw);
         });
+    }
+
+    function toggleScrews() {
+        const screws = document.querySelectorAll('.screw');
+        screws.forEach(screw => {
+            if (screw.classList.contains('screw-missing')) {
+                screw.classList.remove('screw-missing');
+                screw.classList.add('screw-present');
+                console.log(`Made screw appear: ${screw.className}`);
+            }
+        });
+        checkAllScrewsAndRotate();
+    }
+
+    function checkAllScrewsAndRotate() {
+        const screws = document.querySelectorAll('.screw');
+        const allPresent = Array.from(screws).every(screw => screw.classList.contains('screw-present'));
+
+        const wrapper = document.querySelector('.key-container-wrapper');
+        if (allPresent) {
+            wrapper.style.transform = 'rotate(0deg)';
+        } else {
+            wrapper.style.transform = 'rotate(21deg)';
+        }
     }
 
     function playAudioSample(audio) {
@@ -600,6 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 audioSource.stop();
             }
             playAudioSample(glitchAudio);
+            toggleScrews()
             audioSource = audioContext.createBufferSource();
             audioSource.buffer = audioBuffer;
 
