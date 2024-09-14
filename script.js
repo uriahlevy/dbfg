@@ -119,9 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const vertexShader = `
     uniform float time;
     varying vec2 vUv;
+    varying vec3 vPosition;
 
     void main() {
         vUv = uv;
+        vPosition = position;
         
         // Create complex wave effect
         vec3 pos = position;
@@ -145,10 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
     }
 `;
+
     const fragmentShader = `
     uniform float time;
     varying vec2 vUv;
-
+    varying vec3 vPosition;
+    
     // Simplex 2D noise
     vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
 
@@ -179,10 +183,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return 130.0 * dot(m, g);
     }
 
+    float rain(vec2 uv, float scale) {
+        float t = time * 2.0;
+        uv *= scale;
+        vec2 id = floor(uv);
+        uv = fract(uv) - 0.3;
+        vec2 rn = fract(sin(vec2(
+            dot(id, vec2(127.1, 311.7)),
+            dot(id, vec2(269.5, 183.3))
+        )) * 43758.5453);
+        float rainDrop = smoothstep(0.3, 0.0, length(uv - sin(rn * 6.283 + t) * 0.3) * 15.0);
+        return rainDrop * smoothstep(3.0, 0.9, rn.y);
+    }
+
     void main() {
         vec2 uv = vUv;
         
-        // Create dynamic noise
+        // Create dynamic noise (keep your existing noise code)
         float noise1 = snoise(uv * 800.0 + time * 0.1) * 0.5 + 0.5;
         float noise2 = snoise(uv * 1200.0 - time * 0.1) * 0.5 + 0.5;
         
@@ -197,7 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
         color.b += cos(time * 3.1) * 0.1;
         color.g += cos(time * 3.1) * 0.1;
         
-        gl_FragColor = vec4(color, 0.10);
+        // Rain effect
+        float rainEffect = rain(uv, 15.0) * 0.5 + rain(uv, 15.0) * 0.4;
+        
+        // Mix rain with base color
+        vec3 rainColor = vec3(0.7, 0.7, 1.0);
+        color = mix(color, rainColor, rainEffect);
+        
+        gl_FragColor = vec4(color, 0.10 + rainEffect * 0.15);
     }
 `;
 
@@ -289,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'A4', 'A4', 'A4', 'G#4', 'E4'
     ];
     let noteIndex = 0;
-    const message = "NOFEELINGCOMESCLOSE";
+    const firstMessage = "NOFEELINGCOMESCLOSE";
     const activeNotes = {};
 
     let audioContext;
@@ -413,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = event.key.toUpperCase();
         const note = melody[noteIndex];
 
-        if (noteIndex < melody.length && key === message[noteIndex]) {
+        if (noteIndex < melody.length && key === firstMessage[noteIndex]) {
             const noteOctave = note.slice(0, -1);
             const octaveNumber = parseInt(note.slice(-1));
             const higherOctave = noteOctave + (octaveNumber + 1);
@@ -464,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keyup', (event) => {
         const key = event.key.toUpperCase();
-        if (key === message[noteIndex - 1]) {
+        if (key === firstMessage[noteIndex - 1]) {
             stopNote();
         }
     });
@@ -562,6 +586,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playEndAudio() {
+        const key = document.querySelector('.key');
+        key.style.filter = 'none';
+        const wrapper = document.querySelector('.key-container-wrapper');
+        wrapper.style.filter = 'none';
+        const cont = document.querySelector('.key-container');
+        cont.style.filter = 'none';
+        const origCont = document.querySelector('.container');
+        origCont.style.filter = 'none';
         console.log('playEndAudio called');
         if (!audioPlayed && audioBuffer) {
             if (audioSource) {

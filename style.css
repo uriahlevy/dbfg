@@ -21,7 +21,6 @@ body {
     background: conic-gradient(from 45deg, #2800ff, #910098, #008667, #171717, #2800ff);
     background-size: 100% 100%;
     pointer-events: none;
-    /*transition: opacity 0.8s ease;*/
 }
 
 .upsidedown {
@@ -36,6 +35,7 @@ body {
     width: 100%;
     height: 100%;
     z-index: -1;
+    overflow: hidden;
 }
 
 html, body {
@@ -145,6 +145,7 @@ html, body {
     width: 100%;
     height: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 @keyframes jitter {
@@ -171,12 +172,25 @@ html, body {
     animation: jitter 1.2s infinite;
     color: #fff;
     border-radius: 15px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     box-shadow: 0 0 30px rgba(212, 142, 255, 0.3);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+}
+
+.key-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: url('#paper');
+    z-index: -1;
+    opacity: 0.07;
 }
 
 .key-container-wrapper {
@@ -257,7 +271,7 @@ html, body {
 .key {
     display: inline-block;
     background: none;
-    border: 2px solid #D48EFF;
+    border: 2px solid #d79dfc;
     filter: url('#turbulence');
     border-radius: 10px;
     padding: 15px 20px;
@@ -322,11 +336,6 @@ html, body {
         box-shadow: none;
     }
 }
-
-/*@keyframes fall-effect {*/
-/*    0%, 100% { transform: translateY(0) scale(0.95); }*/
-/*    50% { transform: translateY(10px) scale(0.95); }*/
-/*}*/
 
 @keyframes press-effect {
     0% {
