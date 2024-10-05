@@ -10,6 +10,26 @@ body {
     background: radial-gradient(circle at center, #2800ff, #69016e, #480026, #000000);
 }
 
+#animated-object-left {
+    position: absolute;
+    top: 65%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    width: 400px;
+    height: 400px;
+}
+
+#animated-object-right {
+    position: absolute;
+    top: 65%;
+    left: 80%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    width: 400px;
+    height: 400px;
+}
+
 .iridescent-layer {
     position: absolute;
     top: 0;
@@ -166,19 +186,30 @@ html, body {
     }
 }
 
+#scene-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
 .key-container {
     padding: 30px;
     filter: url('#turbulence');
     animation: jitter 1.2s infinite;
     color: #fff;
     border-radius: 15px;
-    background: rgba(255, 255, 255, 0.04);
+    background: linear-gradient(to left, #D48EFF, #6982ff);
     box-shadow: 0 0 30px rgba(212, 142, 255, 0.3);
     display: flex;
     flex-direction: column;
     justify-content: left;
-    /*align-items: left;*/
     overflow: hidden;
+    position: relative;
+    z-index: -1;
+    isolation: isolate;
 }
 
 .key-container::before {
@@ -188,9 +219,12 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    filter: url('#paper');
+    background: url('glass.jpg');
+    background-size: cover;
+    opacity: 0.3;
+    mix-blend-mode: overlay;
+    pointer-events: none;
     z-index: -1;
-    opacity: 0.07;
 }
 
 .key-container-wrapper {
@@ -209,14 +243,6 @@ html, body {
 .key-container-wrapper {
     transition: transform 0.5s ease;
 }
-
-/*.screw {*/
-/*    position: absolute;*/
-/*    width: 12px;*/
-/*    height: 12px;*/
-/*    border-radius: 50%;*/
-/*    transition: all 0.3s ease;*/
-/*}*/
 
 .screw {
     position: absolute;
@@ -260,27 +286,43 @@ html, body {
     transform: translate(-50%, -50%);
 }
 
-.screw-top-left { top: 5px; left: 5px; }
-.screw-top-right { top: 5px; right: 5px; }
-.screw-bottom-left { bottom: 5px; left: 5px; }
-.screw-bottom-right { bottom: 5px; right: 5px; }
+.screw-top-left {
+    top: 5px;
+    left: 5px;
+}
+
+.screw-top-right {
+    top: 5px;
+    right: 5px;
+}
+
+.screw-bottom-left {
+    bottom: 5px;
+    left: 5px;
+}
+
+.screw-bottom-right {
+    bottom: 5px;
+    right: 5px;
+}
 
 .key {
     display: inline-block;
-    background: none;
-    border: 2px solid #d79dfc;
     filter: url('#turbulence');
+    border: 2.5px solid #de9bff;
     border-radius: 10px;
-    padding: 15px 20px;
+    /*clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);*/
+    padding: 22px 28px;
     margin: 8px;
-    font-size: 20px;
+    font-size: 23px;
     text-align: center;
-    color: #D48EFF;
+    color: #de9bff;
     opacity: 0;
     text-shadow: 0 0 5px #D48EFF;
     box-shadow: 0 0 10px #D48EFF, inset 0 0 10px #D48EFF;
     transition: all 0.3s ease;
     position: relative;
+    z-index: 2; /* Add this line */
 }
 
 .key.active {
@@ -288,14 +330,13 @@ html, body {
 }
 
 .key.pressed {
-    background: #D48EFF;
+    background: #dea5ff;
     color: #fff;
     text-shadow: none;
     opacity: 0.6;
     transform: scale(0.95);
     animation: press-effect 0.3s ease-out,
     neon-flicker 1.5s infinite alternate
-    /*fall-effect 1s ease-in-out infinite;*/
 }
 
 .key.pressed::after {
@@ -312,12 +353,12 @@ html, body {
 
 @keyframes neon-flicker {
     0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 0.6;
+        opacity: 0.7;
         text-shadow: 0 0 5px #D48EFF, 0 0 10px #D48EFF, 0 0 15px #D48EFF;
         box-shadow: 0 0 10px #D48EFF, inset 0 0 10px #D48EFF;
     }
     20%, 24%, 55% {
-        opacity: 0.2;
+        opacity: 0.1;
         text-shadow: none;
         box-shadow: none;
     }

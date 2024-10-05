@@ -1,311 +1,42 @@
+let morphProgress = 0;
+const totalSteps = 19;
+let currentStep = 0;
+
+
 document.addEventListener('DOMContentLoaded', () => {
-    function isMobileDevice() {
-        console.log('Window inner width:', window.innerWidth);
-        console.log('User Agent:', navigator.userAgent);
-        console.log('Max Touch Points:', navigator.maxTouchPoints);
-        // Check if touch is supported
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            // Additional check for iOS devices
-            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                return true;
-            }
-
-            // Check for Android and other mobile devices
-            if (/Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                return true;
-            }
-
-            // Check screen size (use a larger value for high-res screens)
-            if (window.innerWidth <= 1024) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function showMobileMessage() {
-        const divToHide = document.querySelector('.key-container-wrapper');
-        const volumeLabelToHide = document.querySelector('.volume-label');
-        const resetMelodyToHide = document.getElementById('reset-melody');
-        const startAudioToHide = document.getElementById('start-audio');
-        if (divToHide) {
-            divToHide.style.display = 'none';
-            resetMelodyToHide.style.display = 'none';
-            startAudioToHide.style.display = 'none';
-            volumeLabelToHide.style.display = 'none';
-        }
-        const mobileMessageElement = document.getElementById('mobile-message');
-        if (mobileMessageElement) {
-            mobileMessageElement.style.display = 'block';
-        }
-    }
-
-    function isWebGLAvailable() {
-        try {
-            const canvas = document.createElement('canvas');
-            let webglAvailable = !!(window.WebGLRenderingContext &&
-                (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-            dataLayer.push({
-                'event': 'webgl_available',
-                'event_category': 'engagement'
-            });
-            return webglAvailable;
-        } catch (e) {
-            dataLayer.push({
-                'event': 'webgl_unavailable',
-                'event_category': 'engagement'
-            });
-            return false;
-        }
-    }
-
-    function showWebGLInstructions() {
-        dataLayer.push({
-            'event': 'webgl_instructions_shown',
-            'event_category': 'engagement'
-        });
-        const divToHide = document.querySelector('.key-container-wrapper');
-        if (divToHide) {
-            divToHide.style.display = 'none';
-        }
-        const instructionsElement = document.getElementById('webgl-instructions');
-        if (instructionsElement) {
-            instructionsElement.style.display = 'block';
-        }
-    }
-
-    function initRenderer() {
-        if (isWebGLAvailable()) {
-            try {
-                renderer = new THREE.WebGLRenderer({
-                    canvas: document.getElementById('holographic-background'),
-                    alpha: true,
-                    antialias: true // Added for smoother lines
-                });
-                updateVersionLabel(true);
-            } catch (e) {
-                console.warn("WebGL initialization failed, falling back to CSS3DRenderer");
-                showWebGLInstructions();
-                updateVersionLabel(false);
-                return tryCSS3DRenderer();
-            }
-        } else {
-            console.warn("WebGL not supported, falling back to CSS3DRenderer");
-            showWebGLInstructions();
-            updateVersionLabel(false);
-            return tryCSS3DRenderer();
-        }
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio); // For sharper rendering
-        return true;
-    }
-
-    function tryCSS3DRenderer() {
-        try {
-            renderer = new THREE.CSS3DRenderer();
-            renderer.domElement.style.position = 'absolute';
-            renderer.domElement.style.top = '0';
-            document.body.appendChild(renderer.domElement);
-            return true;
-        } catch (e) {
-            console.warn("CSS3DRenderer not supported, falling back to CSS animation");
-            useCSSFallback();
-            return false;
-        }
-    }
-
-    const vertexShader = `
-    uniform float time;
-    varying vec2 vUv;
-    varying vec3 vPosition;
-
-    void main() {
-        vUv = uv;
-        vPosition = position;
-        
-        // Create complex wave effect
-        vec3 pos = position;
-        
-        // Wave 1: Large, slow-moving wave
-        float wave1 = sin(pos.x * 1.0 + time * 0.5) * cos(pos.y * 1.0 + time * 0.3) * 0.1;
-        
-        // Wave 2: Medium, faster-moving wave
-        float wave2 = sin(pos.x * 6.0 - time * 0.7) * cos(pos.y * 2.0 + time * 0.6) * 0.05;
-        
-        // Wave 3: Small, rapid wave
-        float wave3 = sin(pos.x * 4.0 + time * 1.1) * cos(pos.y * 4.0 - time * 0.9) * 0.025;
-        
-        // Combine waves
-        pos.z += wave1 + wave2 + wave3;
-        
-        // Add some horizontal and vertical movement
-        pos.x += sin(time * 0.2) * 0.2;
-        pos.y += cos(time * 0.1) * 0.2;
-        
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-    }
-`;
-
-    const fragmentShader = `
-    uniform float time;
-    varying vec2 vUv;
-    varying vec3 vPosition;
-    
-    // Simplex 2D noise
-    vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
-
-    float snoise(vec2 v){
-        const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                -0.577350269189626, 0.024390243902439);
-        vec2 i  = floor(v + dot(v, C.yy) );
-        vec2 x0 = v -   i + dot(i, C.xx);
-        vec2 i1;
-        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-        vec4 x12 = x0.xyxy + C.xxzz;
-        x12.xy -= i1;
-        i = mod(i, 289.0);
-        vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-        + i.x + vec3(0.0, i1.x, 1.0 ));
-        vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
-            dot(x12.zw,x12.zw)), 0.0);
-        m = m*m ;
-        m = m*m ;
-        vec3 x = 2.0 * fract(p * C.www) - 1.0;
-        vec3 h = abs(x) - 0.5;
-        vec3 ox = floor(x + 0.5);
-        vec3 a0 = x - ox;
-        m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-        vec3 g;
-        g.x  = a0.x  * x0.x  + h.x  * x0.y;
-        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-        return 130.0 * dot(m, g);
-    }
-
-    float rain(vec2 uv, float scale) {
-        float t = time * 2.0;
-        uv *= scale;
-        vec2 id = floor(uv);
-        uv = fract(uv) - 0.3;
-        vec2 rn = fract(sin(vec2(
-            dot(id, vec2(127.1, 311.7)),
-            dot(id, vec2(269.5, 183.3))
-        )) * 43758.5453);
-        float rainDrop = smoothstep(0.3, 0.0, length(uv - sin(rn * 6.283 + t) * 0.3) * 15.0);
-        return rainDrop * smoothstep(3.0, 0.9, rn.y);
-    }
-
-    void main() {
-        vec2 uv = vUv;
-        
-        // Create dynamic noise (keep your existing noise code)
-        float noise1 = snoise(uv * 800.0 + time * 0.1) * 0.5 + 0.5;
-        float noise2 = snoise(uv * 1200.0 - time * 0.1) * 0.5 + 0.5;
-        
-        // Combine noises
-        float finalNoise = mix(noise1, noise2, 0.5);
-        
-        // Create color
-        vec3 color = vec3(finalNoise);
-        
-        // Add some color variation
-        color.r += sin(time * 3.2) * 0.2;
-        color.b += cos(time * 3.1) * 0.1;
-        color.g += cos(time * 3.1) * 0.1;
-        
-        // Rain effect
-        float rainEffect = rain(uv, 15.0) * 0.5 + rain(uv, 15.0) * 0.4;
-        
-        // Mix rain with base color
-        vec3 rainColor = vec3(0.7, 0.7, 1.0);
-        color = mix(color, rainColor, rainEffect);
-        
-        gl_FragColor = vec4(color, 0.10 + rainEffect * 0.15);
-    }
-`;
-
-    function initScene() {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 0.5;
-
-        const geometry = new THREE.PlaneGeometry(3, 3, 800, 800);
-        const material = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            transparent: true,
-            wireframe: true,
-            uniforms: {
-                time: {value: 1}
-            }
-        });
-
-        waveObject = new THREE.Mesh(geometry, material);
-        scene.add(waveObject);
-
-        animate();
-    }
-
-    function init() {
+    // addScrewsToContainer();
+    function initThreeJSAnimations() {
         if (isMobileDevice()) {
             showMobileMessage();
-        } else if (initRenderer()) {
-            initScene();
-        }
-    }
-
-    init();
-
-    function animate() {
-        requestAnimationFrame(animate);
-        waveObject.material.uniforms.time.value += 0.01;
-        renderer.render(scene, camera);
-    }
-
-    function useCSSFallback() {
-        const canvas = document.getElementById('holographic-background');
-        canvas.style.position = 'fixed';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        canvas.style.background = 'linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)';
-        canvas.style.backgroundSize = '4px 4px';
-        canvas.style.animation = 'wave 20s linear infinite';
-
-        const style = document.createElement('style');
-        style.textContent = `
-        @keyframes wave {
-            0% { background-position: 0 0; }
-            100% { background-position: 80px 80px; }
-        }
-    `;
-        document.head.appendChild(style);
-    }
-
-    window.addEventListener('resize', () => {
-        if (camera && renderer) {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-        }
-    });
-    addScrewsToContainer();
-
-    function updateVersionLabel(isWebGLEnabled) {
-        const webglStatus = document.getElementById('webgl-status');
-        if (webglStatus) {
-            if (isWebGLEnabled) {
-                webglStatus.textContent = '.WebGL';
-                webglStatus.style.color = '#4CAF50';
-            } else {
-                webglStatus.textContent = '.CSS';
-                webglStatus.style.color = '#FF5252';
+        } else if (window.initRenderer()) {
+            if (typeof window.initBackgroundScene === 'function') {
+                window.initBackgroundScene();
             }
+            if (typeof window.initAnimatedObjects === 'function') {
+                window.initAnimatedObjects();
+            }
+
+            function animate(timestamp) {
+                requestAnimationFrame(animate);
+
+                // Convert timestamp to seconds
+                const timeInSeconds = timestamp * 0.001;
+
+                if (typeof window.animateBackground === 'function') {
+                    window.animateBackground(timeInSeconds);
+                }
+                if (typeof window.animateObjects === 'function') {
+                    window.animateObjects(timeInSeconds);
+                }
+            }
+
+            requestAnimationFrame(animate);
         }
     }
+
+    initThreeJSAnimations();
+    let keySequenceProgress = 0;
+    const totalKeySequence = 19;
 
     const melody = [
         'A4', 'B4', 'G#4', 'A4', 'G#4', 'E4', 'F#4',
@@ -328,23 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const glitchAudio = new Audio('glitch_short.wav');
     const crackleAudio = new Audio('crackles.wav')
 
-    function addScrewsToContainer() {
-        const wrapper = document.querySelector('.key-container-wrapper');
-        const screwPositions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-
-        screwPositions.forEach(position => {
-            const screw = document.createElement('div');
-            screw.className = `screw screw-${position}`;
-
-            if (position === 'top-left' || position === 'bottom-left' || position === 'bottom-right') {
-                screw.classList.add('screw-missing');
-            } else {
-                screw.classList.add('screw-present');
-            }
-
-            wrapper.appendChild(screw);
-        });
-    }
 
     function toggleScrews() {
         const screws = document.querySelectorAll('.screw');
@@ -355,19 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Made screw appear: ${screw.className}`);
             }
         });
-        checkAllScrewsAndRotate();
-    }
-
-    function checkAllScrewsAndRotate() {
-        const screws = document.querySelectorAll('.screw');
-        const allPresent = Array.from(screws).every(screw => screw.classList.contains('screw-present'));
-
-        const wrapper = document.querySelector('.key-container-wrapper');
-        if (allPresent) {
-            wrapper.style.transform = 'rotate(0deg)';
-        } else {
-            wrapper.style.transform = 'rotate(21deg)';
-        }
     }
 
     function playAudioSample(audio) {
@@ -459,16 +160,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeHigherNote = null;
     let isMelodyCompleted = false;
     applyBadBulbEffect();
-
     document.addEventListener('keydown', async (event) => {
-        dataLayer.push({
-            'event': 'keyboard_key_pressed',
-            'event_category': 'engagement'
-        });
+        // dataLayer.push({
+        //     'event': 'keyboard_key_pressed',
+        //     'event_category': 'engagement'
+        // });
+
+
+
         const key = event.key.toUpperCase();
         const note = melody[noteIndex];
 
         if (noteIndex < melody.length && key === firstMessage[noteIndex]) {
+
+            applyGlitchEffect();
+            currentStep++
+            updateMorphProgress(currentStep, totalSteps);
             const noteOctave = note.slice(0, -1);
             const octaveNumber = parseInt(note.slice(-1));
             const higherOctave = noteOctave + (octaveNumber + 1);
@@ -483,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             noteIndex++;
 
             if (noteIndex >= melody.length) {
+                isHeartFormed = true
                 dataLayer.push({
                     'event': 'melody_completed',
                     'event_category': 'engagement'
@@ -595,20 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
         displayNextKey(noteIndex);
     }
 
-    function displayAllKeys() {
-        const allElements = document.querySelectorAll('.key');
-        allElements.forEach(element => {
-            element.classList.remove('active', 'pressed');
-            element.style.opacity = 1;
-        });
-    }
-
     displayNextKey(noteIndex);
 
     function startThumping() {
         const keys = document.querySelectorAll('.key');
         keys.forEach(key => key.classList.add('thumping'));
-        document.querySelector('.key-container').classList.add('thumping');
+        document.querySelector('#animated-object-left').classList.add('thumping');
+        document.querySelector('#animated-object-right').classList.add('thumping');
     }
 
     function stopThumping() {
@@ -619,10 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function playEndAudio() {
         const key = document.querySelector('.key');
         key.style.filter = 'none';
-        const wrapper = document.querySelector('.key-container-wrapper');
-        wrapper.style.filter = 'none';
-        const cont = document.querySelector('.key-container');
-        cont.style.filter = 'none';
+        // const wrapper = document.querySelector('.key-container-wrapper');
+        // wrapper.style.filter = 'none';
+        // const cont = document.querySelector('.key-container');
+        // cont.style.filter = 'none';
         const origCont = document.querySelector('.container');
         origCont.style.filter = 'none';
         console.log('playEndAudio called');
@@ -764,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.opacity = '1';
 
         let startTime = performance.now();
-        const duration = 1800;
+        const duration = 300;
         let isEffectActive = true;
 
         function glitchFrame(currentTime) {
@@ -779,13 +480,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, Math.random() * 50 + 20);
                 }
 
-                if (Math.random() < 0.7) {
+                if (Math.random() < 0.8) {
                     const hue = Math.floor(Math.random() * 360);
-                    overlay.style.backgroundColor = `hsl(${hue}, 150%, 80%)`;
+                    overlay.style.backgroundColor = `hsl(${hue}, 100%, 80%)`;
                     overlay.style.mixBlendMode = 'difference';
                 } else {
                     overlay.style.backgroundColor = 'black';
-                    overlay.style.mixBlendMode = 'normal';
+                    overlay.style.mixBlendMode = 'overlay';
                 }
 
                 requestAnimationFrame(glitchFrame);

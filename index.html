@@ -4,12 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WSZLGXRB');</script>
-    <!-- End Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        });
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-WSZLGXRB');</script>
     <!-- End Google Tag Manager -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DBFG Club</title>
@@ -21,58 +28,57 @@
 
 <body>
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WSZLGXRB"
-                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WSZLGXRB"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
 <!-- End Google Tag Manager (noscript) -->
 <canvas id="holographic-background"></canvas>
-
 <div class="container">
     <div class="volume-label">Volume Up</div>
     <div class="version-label">dbfg.club v2.0.0.rev1 <span id="webgl-status"></span></div>
-    <div class="iridescent-layer"></div>
-    <div class="key-container-wrapper">
-        <div class="key-container">
-            <div class="word">
-                <span class="key" data-key="0">N</span>
-                <span class="key" data-key="1">O</span>
-            </div>
-            <div class="word">
-                <span class="key upsidedown" data-key="2">F</span>
-                <span class="key" data-key="3">E</span>
-                <span class="key" data-key="4">E</span>
-                <span class="key" data-key="5">L</span>
-                <span class="key" data-key="6">I</span>
-                <span class="key" data-key="7">N</span>
-                <span class="key upsidedown" data-key="8">G</span>
-            </div>
-            <div class="word">
-                <span class="key" data-key="9">C</span>
-                <span class="key" data-key="10">O</span>
-                <span class="key" data-key="11">M</span>
-                <span class="key" data-key="12">E</span>
-                <span class="key" data-key="13">S</span>
-            </div>
-            <div class="word">
-                <span class="key upsidedown" data-key="14">C</span>
-                <span class="key" data-key="15">L</span>
-                <span class="key" data-key="16">O</span>
-                <span class="key upsidedown" data-key="17">S</span>
-                <span class="key" data-key="18">E</span>
-            </div>
-            <div class="word">
-                <button class="key" data-key="kick">boom</button>
-                <button class="key" data-key="snare">pa</button>
-            </div>
-            <div class="word">
-                <audio data-key="kick" src="kick.wav"></audio>
-                <audio data-key="snare" src="snare.wav"></audio>
-            </div>
-        </div>
+<!--    <div class="iridescent-layer"></div>-->
+    <canvas id="animated-object-left"></canvas>
+    <canvas id="animated-object-right"></canvas>
+    <div class="word">
+        <span class="key" data-key="0">N</span>
+        <span class="key" data-key="1">O</span>
     </div>
-    <div class="button-container">
-        <button id="reset-melody">reset melody</button>
-        <button id="start-audio">enable audio</button>
+    <div class="word">
+        <span class="key upsidedown" data-key="2">F</span>
+        <span class="key" data-key="3">E</span>
+        <span class="key" data-key="4">E</span>
+        <span class="key" data-key="5">L</span>
+        <span class="key" data-key="6">I</span>
+        <span class="key" data-key="7">N</span>
+        <span class="key upsidedown" data-key="8">G</span>
     </div>
+    <div class="word">
+        <span class="key" data-key="9">C</span>
+        <span class="key" data-key="10">O</span>
+        <span class="key" data-key="11">M</span>
+        <span class="key" data-key="12">E</span>
+        <span class="key" data-key="13">S</span>
+    </div>
+    <div class="word">
+        <span class="key upsidedown" data-key="14">C</span>
+        <span class="key" data-key="15">L</span>
+        <span class="key" data-key="16">O</span>
+        <span class="key upsidedown" data-key="17">S</span>
+        <span class="key" data-key="18">E</span>
+    </div>
+    <div class="word">
+        <button class="key" data-key="kick">boom</button>
+        <button class="key" data-key="snare">pa</button>
+    </div>
+    <div class="word">
+        <audio data-key="kick" src="kick.wav"></audio>
+        <audio data-key="snare" src="snare.wav"></audio>
+    </div>
+</div>
+<div class="button-container">
+    <button id="reset-melody">reset melody</button>
+    <button id="start-audio">enable audio</button>
 </div>
 <div id="mobile-message" style="display: none;">
     <h2>Mobile Device</h2>
@@ -93,11 +99,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.34/Tone.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/renderers/CSS3DRenderer.js"></script>
+<script src="background.js"></script>
+<script src="object.js"></script>
 <script src="script.js"></script>
 <svg style="display: none;">
     <filter id="turbulence">
-        <feTurbulence type="fractalNoise" baseFrequency="0.08 0.05" numOctaves="2" seed="1" stitchTiles="stitch"/>
-        <feDisplacementMap in="SourceGraphic" scale="3"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.08 0.05" numOctaves="6" seed="4" stitchTiles="stitch"/>
+        <feDisplacementMap in="SourceGraphic" scale="15"/>
     </filter>
     <filter id="paper" x="0%" y="0%" width="100%" height="100%">
         <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3"/>
